@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { DukaProvider } from "@/lib/duka/store";
+import { ToastProvider } from "@/components/duka/Toast";
 
 function NotFoundComponent() {
   return (
