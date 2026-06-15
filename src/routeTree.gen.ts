@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MauzoRouteImport } from './routes/mauzo'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BidhaaRouteImport } from './routes/bidhaa'
 import { Route as IndexRouteImport } from './routes/index'
 
+const MauzoRoute = MauzoRouteImport.update({
+  id: '/mauzo',
+  path: '/mauzo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -33,34 +39,45 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
+  '/mauzo': typeof MauzoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
+  '/mauzo': typeof MauzoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
+  '/mauzo': typeof MauzoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/bidhaa' | '/login'
+  fullPaths: '/' | '/bidhaa' | '/login' | '/mauzo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/bidhaa' | '/login'
-  id: '__root__' | '/' | '/bidhaa' | '/login'
+  to: '/' | '/bidhaa' | '/login' | '/mauzo'
+  id: '__root__' | '/' | '/bidhaa' | '/login' | '/mauzo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BidhaaRoute: typeof BidhaaRoute
   LoginRoute: typeof LoginRoute
+  MauzoRoute: typeof MauzoRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mauzo': {
+      id: '/mauzo'
+      path: '/mauzo'
+      fullPath: '/mauzo'
+      preLoaderRoute: typeof MauzoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BidhaaRoute: BidhaaRoute,
   LoginRoute: LoginRoute,
+  MauzoRoute: MauzoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
