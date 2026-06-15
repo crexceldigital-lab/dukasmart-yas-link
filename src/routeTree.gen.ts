@@ -9,38 +9,155 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MauzoRouteImport } from './routes/mauzo'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as BidhaaRouteImport } from './routes/bidhaa'
+import { Route as AkauntiRouteImport } from './routes/akaunti'
+import { Route as AfyaRouteImport } from './routes/afya'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PaySlugRouteImport } from './routes/pay.$slug'
 
+const MauzoRoute = MauzoRouteImport.update({
+  id: '/mauzo',
+  path: '/mauzo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BidhaaRoute = BidhaaRouteImport.update({
+  id: '/bidhaa',
+  path: '/bidhaa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AkauntiRoute = AkauntiRouteImport.update({
+  id: '/akaunti',
+  path: '/akaunti',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfyaRoute = AfyaRouteImport.update({
+  id: '/afya',
+  path: '/afya',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaySlugRoute = PaySlugRouteImport.update({
+  id: '/pay/$slug',
+  path: '/pay/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/afya': typeof AfyaRoute
+  '/akaunti': typeof AkauntiRoute
+  '/bidhaa': typeof BidhaaRoute
+  '/login': typeof LoginRoute
+  '/mauzo': typeof MauzoRoute
+  '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/afya': typeof AfyaRoute
+  '/akaunti': typeof AkauntiRoute
+  '/bidhaa': typeof BidhaaRoute
+  '/login': typeof LoginRoute
+  '/mauzo': typeof MauzoRoute
+  '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/afya': typeof AfyaRoute
+  '/akaunti': typeof AkauntiRoute
+  '/bidhaa': typeof BidhaaRoute
+  '/login': typeof LoginRoute
+  '/mauzo': typeof MauzoRoute
+  '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/afya'
+    | '/akaunti'
+    | '/bidhaa'
+    | '/login'
+    | '/mauzo'
+    | '/pay/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/afya'
+    | '/akaunti'
+    | '/bidhaa'
+    | '/login'
+    | '/mauzo'
+    | '/pay/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/afya'
+    | '/akaunti'
+    | '/bidhaa'
+    | '/login'
+    | '/mauzo'
+    | '/pay/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AfyaRoute: typeof AfyaRoute
+  AkauntiRoute: typeof AkauntiRoute
+  BidhaaRoute: typeof BidhaaRoute
+  LoginRoute: typeof LoginRoute
+  MauzoRoute: typeof MauzoRoute
+  PaySlugRoute: typeof PaySlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mauzo': {
+      id: '/mauzo'
+      path: '/mauzo'
+      fullPath: '/mauzo'
+      preLoaderRoute: typeof MauzoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bidhaa': {
+      id: '/bidhaa'
+      path: '/bidhaa'
+      fullPath: '/bidhaa'
+      preLoaderRoute: typeof BidhaaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/akaunti': {
+      id: '/akaunti'
+      path: '/akaunti'
+      fullPath: '/akaunti'
+      preLoaderRoute: typeof AkauntiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afya': {
+      id: '/afya'
+      path: '/afya'
+      fullPath: '/afya'
+      preLoaderRoute: typeof AfyaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +165,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pay/$slug': {
+      id: '/pay/$slug'
+      path: '/pay/$slug'
+      fullPath: '/pay/$slug'
+      preLoaderRoute: typeof PaySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AfyaRoute: AfyaRoute,
+  AkauntiRoute: AkauntiRoute,
+  BidhaaRoute: BidhaaRoute,
+  LoginRoute: LoginRoute,
+  MauzoRoute: MauzoRoute,
+  PaySlugRoute: PaySlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
