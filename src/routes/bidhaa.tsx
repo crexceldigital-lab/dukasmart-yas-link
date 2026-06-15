@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Shell, Topbar } from "@/components/duka/Shell";
 import { AuthGuard } from "@/components/duka/Guard";
 import { useDuka, type Product } from "@/lib/duka/store";
@@ -105,7 +105,6 @@ function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClo
   );
 }
 
-import { useEffect } from "react";
 function useResetOnOpen(open: boolean, fn: () => void) {
   useEffect(() => { if (open) fn(); /* eslint-disable-next-line */ }, [open]);
 }
