@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as MauzoRouteImport } from './routes/mauzo'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BidhaaRouteImport } from './routes/bidhaa'
+import { Route as AkauntiRouteImport } from './routes/akaunti'
 import { Route as AfyaRouteImport } from './routes/afya'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -30,6 +31,11 @@ const BidhaaRoute = BidhaaRouteImport.update({
   path: '/bidhaa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AkauntiRoute = AkauntiRouteImport.update({
+  id: '/akaunti',
+  path: '/akaunti',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AfyaRoute = AfyaRouteImport.update({
   id: '/afya',
   path: '/afya',
@@ -44,6 +50,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/afya': typeof AfyaRoute
+  '/akaunti': typeof AkauntiRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/afya': typeof AfyaRoute
+  '/akaunti': typeof AkauntiRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
@@ -59,21 +67,23 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/afya': typeof AfyaRoute
+  '/akaunti': typeof AkauntiRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/afya' | '/bidhaa' | '/login' | '/mauzo'
+  fullPaths: '/' | '/afya' | '/akaunti' | '/bidhaa' | '/login' | '/mauzo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/afya' | '/bidhaa' | '/login' | '/mauzo'
-  id: '__root__' | '/' | '/afya' | '/bidhaa' | '/login' | '/mauzo'
+  to: '/' | '/afya' | '/akaunti' | '/bidhaa' | '/login' | '/mauzo'
+  id: '__root__' | '/' | '/afya' | '/akaunti' | '/bidhaa' | '/login' | '/mauzo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AfyaRoute: typeof AfyaRoute
+  AkauntiRoute: typeof AkauntiRoute
   BidhaaRoute: typeof BidhaaRoute
   LoginRoute: typeof LoginRoute
   MauzoRoute: typeof MauzoRoute
@@ -102,6 +112,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BidhaaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/akaunti': {
+      id: '/akaunti'
+      path: '/akaunti'
+      fullPath: '/akaunti'
+      preLoaderRoute: typeof AkauntiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/afya': {
       id: '/afya'
       path: '/afya'
@@ -122,6 +139,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AfyaRoute: AfyaRoute,
+  AkauntiRoute: AkauntiRoute,
   BidhaaRoute: BidhaaRoute,
   LoginRoute: LoginRoute,
   MauzoRoute: MauzoRoute,
