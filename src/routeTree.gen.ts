@@ -15,6 +15,7 @@ import { Route as BidhaaRouteImport } from './routes/bidhaa'
 import { Route as AkauntiRouteImport } from './routes/akaunti'
 import { Route as AfyaRouteImport } from './routes/afya'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PaySlugRouteImport } from './routes/pay.$slug'
 
 const MauzoRoute = MauzoRouteImport.update({
   id: '/mauzo',
@@ -46,6 +47,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaySlugRoute = PaySlugRouteImport.update({
+  id: '/pay/$slug',
+  path: '/pay/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
+  '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
+  '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,13 +79,36 @@ export interface FileRoutesById {
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
+  '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/afya' | '/akaunti' | '/bidhaa' | '/login' | '/mauzo'
+  fullPaths:
+    | '/'
+    | '/afya'
+    | '/akaunti'
+    | '/bidhaa'
+    | '/login'
+    | '/mauzo'
+    | '/pay/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/afya' | '/akaunti' | '/bidhaa' | '/login' | '/mauzo'
-  id: '__root__' | '/' | '/afya' | '/akaunti' | '/bidhaa' | '/login' | '/mauzo'
+  to:
+    | '/'
+    | '/afya'
+    | '/akaunti'
+    | '/bidhaa'
+    | '/login'
+    | '/mauzo'
+    | '/pay/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/afya'
+    | '/akaunti'
+    | '/bidhaa'
+    | '/login'
+    | '/mauzo'
+    | '/pay/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -87,6 +118,7 @@ export interface RootRouteChildren {
   BidhaaRoute: typeof BidhaaRoute
   LoginRoute: typeof LoginRoute
   MauzoRoute: typeof MauzoRoute
+  PaySlugRoute: typeof PaySlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -133,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pay/$slug': {
+      id: '/pay/$slug'
+      path: '/pay/$slug'
+      fullPath: '/pay/$slug'
+      preLoaderRoute: typeof PaySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -143,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   BidhaaRoute: BidhaaRoute,
   LoginRoute: LoginRoute,
   MauzoRoute: MauzoRoute,
+  PaySlugRoute: PaySlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
