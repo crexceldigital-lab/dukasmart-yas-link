@@ -48,10 +48,10 @@ function Dashboard() {
           <StatCard label="Wiki Hii" value={formatTZS(stats.week.total)} sub={`${stats.week.count} miamala`} accent="var(--dy-green)" />
           <StatCard label="Mwezi Huu" value={formatTZS(stats.month.total)} sub={`${stats.month.count} miamala`} />
           <StatCard label="Jumla Yote" value={formatTZS(stats.allTime.total)} sub={`${stats.allTime.count} miamala`} />
-          <div className="dy-card" style={{ background: "linear-gradient(135deg, #1A3E6F, #2A5FAF)", color: "#fff", border: "none" }}>
+          <div className="dy-card" style={{ background: "linear-gradient(135deg, #123274, #1B49A6)", color: "#fff", border: "none" }}>
             <div style={{ fontSize: 11.5, fontWeight: 600, opacity: 0.8, textTransform: "uppercase", letterSpacing: ".06em" }}>Afya ya Biashara</div>
             <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>{merchant.creditScore}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#7CE3B5", marginTop: 2 }}>{tier.swahili}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD100", marginTop: 2 }}>{tier.swahili}</div>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ function Dashboard() {
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {rewards.map(r => (
                 <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#F5A623,#E08E0B)", color: "#fff", display: "grid", placeItems: "center", fontSize: 18 }}>🎁</div>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#FFD100,#E0B400)", color: "#123274", display: "grid", placeItems: "center", fontSize: 18 }}>🎁</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 800, color: "var(--dy-yellow)" }}>{r.value}</div>
                     <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>{r.label}</div>
