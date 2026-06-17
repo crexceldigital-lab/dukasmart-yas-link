@@ -10,7 +10,6 @@ import { useI18n } from "@/lib/duka/i18n";
 import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Sparkles, Users } from "lucide-react";
 import { useProGate } from "@/lib/duka/useProGate";
 import { ProLockOverlay } from "@/components/duka/ProLockOverlay";
-import { formatDate as fmtDate } from "@/lib/duka/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -57,7 +56,7 @@ function Dashboard() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13.5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name ?? `+${c.phone}`}</div>
-                <div style={{ fontSize: 11.5, color: "var(--dy-muted)" }}>{c.purchaseCount} {t("ununuzi", "purchases")} • {fmtDate(c.lastPurchase)}</div>
+              <div style={{ fontSize: 11.5, color: "var(--dy-muted)" }}>{c.purchaseCount} {t("ununuzi", "purchases")} • {formatDate(c.lastPurchase)}</div>
               </div>
               <div style={{ fontSize: 14, fontWeight: 800, color: "var(--dy-green)" }}>{formatTZS(c.totalSpent)}</div>
             </div>
