@@ -5,6 +5,7 @@ import { useDuka } from "@/lib/duka/store";
 import { getTier, TIERS } from "@/lib/duka/utils";
 import { CreditRing } from "@/components/duka/CreditRing";
 import { useI18n } from "@/lib/duka/i18n";
+import { Lightbulb, ChevronLeft, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/afya")({
   head: () => ({ meta: [{ title: "Afya ya Biashara — DUKA SMART" }, { name: "description", content: "Tazama kiwango chako cha mkopo na jinsi ya kukikuza." }] }),
@@ -27,7 +28,7 @@ function Afya() {
         <div className="dy-card" style={{ paddingTop: 24, textAlign: "center" }}>
           <CreditRing score={score} />
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--dy-text)", marginTop: 12 }}>{lang === "en" ? tier.english : tier.swahili}</div>
-          {next ? <div style={{ fontSize: 12.5, color: "var(--dy-muted)", marginTop: 4 }}>{t(`Pointi ${pointsToNext} zinakupeleka kiwango cha `, `${pointsToNext} points to tier `)}<b style={{ color: next.color }}>{lang === "en" ? next.english : next.swahili}</b></div> : <div style={{ fontSize: 12.5, color: "var(--dy-green)", marginTop: 4, fontWeight: 700 }}>{t("Umefika kiwango cha juu kabisa! 🎉", "You've reached the top tier! 🎉")}</div>}
+          {next ? <div style={{ fontSize: 12.5, color: "var(--dy-muted)", marginTop: 4 }}>{t(`Pointi ${pointsToNext} zinakupeleka kiwango cha `, `${pointsToNext} points to tier `)}<b style={{ color: next.color }}>{lang === "en" ? next.english : next.swahili}</b></div> : <div style={{ fontSize: 12.5, color: "var(--dy-green)", marginTop: 4, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}><Trophy size={14} strokeWidth={2.5} /> {t("Umefika kiwango cha juu kabisa!", "You've reached the top tier!")}</div>}
         </div>
 
         <div className="dy-card" style={{ padding: 0 }}>
@@ -46,14 +47,15 @@ function Afya() {
                   <div style={{ fontSize: 14, fontWeight: 800 }}>{lang === "en" ? tierItem.english : tierItem.swahili} <span style={{ color: "var(--dy-muted)", fontWeight: 500, fontSize: 12 }}>({tierItem.min}-{tierItem.max})</span></div>
                   <div style={{ fontSize: 12, color: "var(--dy-muted)", marginTop: 2 }}>{tierItem.benefit}</div>
                 </div>
-                {active ? <div style={{ fontSize: 20 }}>👈</div> : null}
+                {active ? <ChevronLeft size={20} strokeWidth={2.5} color="var(--dy-navy)" /> : null}
               </div>
             );
           })}
         </div>
 
-        <div style={{ background: "rgba(18,50,116,0.06)", border: "1px solid rgba(18,50,116,0.18)", color: "var(--dy-navy)", padding: 14, borderRadius: 12, fontSize: 13 }}>
-          💡 <b>{t("Vidokezo:", "Tips:")}</b> {t("Kuza Afya yako kwa kuuza mara kwa mara, kuwa na bidhaa nyingi zinazopatikana, na kupokea malipo kwa Mixx by Yas.", "Grow your Health by selling regularly, keeping more products available, and accepting payments via Mixx by Yas.")}
+        <div style={{ background: "rgba(18,50,116,0.06)", border: "1px solid rgba(18,50,116,0.18)", color: "var(--dy-navy)", padding: 14, borderRadius: 12, fontSize: 13, display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <Lightbulb size={18} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div><b>{t("Vidokezo:", "Tips:")}</b> {t("Kuza Afya yako kwa kuuza mara kwa mara, kuwa na bidhaa nyingi zinazopatikana, na kupokea malipo kwa Mixx by Yas.", "Grow your Health by selling regularly, keeping more products available, and accepting payments via Mixx by Yas.")}</div>
         </div>
       </div>
     </>

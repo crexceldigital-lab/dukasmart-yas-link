@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useDuka } from "@/lib/duka/store";
-import { formatTZS, categoryEmoji } from "@/lib/duka/utils";
+import { formatTZS } from "@/lib/duka/utils";
 import { YasLogo, DukaSmartWordmark } from "@/components/duka/YasLogo";
 import { LangToggle, useI18n } from "@/lib/duka/i18n";
+import { Link2, CreditCard, Lock, Info, Clock, Check, X, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/pay/$slug")({
   head: () => ({ meta: [{ title: "Lipa kwa Mixx by Yas — DUKA SMART" }, { name: "description", content: "Lipa salama kupitia Mixx by Yas." }] }),
@@ -36,7 +37,7 @@ function PayPage() {
     return (
       <div style={{ maxWidth: 430, margin: "0 auto", minHeight: "100vh", background: "var(--dy-bg)", display: "grid", placeItems: "center", padding: 24, textAlign: "center" }}>
         <div>
-          <div style={{ fontSize: 56 }}>🔗</div>
+          <Link2 size={56} strokeWidth={1.5} color="var(--dy-muted)" />
           <h1 style={{ fontSize: 20, fontWeight: 800, marginTop: 12 }}>{t("Kiungo Hakipatikani", "Link Not Found")}</h1>
           <p style={{ fontSize: 14, color: "var(--dy-muted)", marginTop: 6 }}>{t("Kiungo hiki cha malipo hakipo au kimemalizika muda wake.", "This payment link doesn't exist or has expired.")}</p>
         </div>
@@ -84,15 +85,20 @@ function PayPage() {
             <div style={{ fontSize: 15, fontWeight: 800 }}>{t("Lipa kwa Mixx by Yas", "Pay with Mixx by Yas")}</div>
             <div><label className="dy-label">{t("Nambari yako ya Mixx *", "Your Mixx Number *")}</label>
               <div style={{ display: "flex", gap: 8 }}>
-                <div className="dy-input" style={{ width: 96, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700 }}>🇹🇿 +255</div>
+              <div className="dy-input" style={{ width: 96, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700 }}>TZ +255</div>
                 <input className="dy-input" inputMode="numeric" placeholder="711 000 001" value={phone} onChange={e => setPhone(e.target.value)} />
               </div>
             </div>
             <div><label className="dy-label">{t("Jina lako (hiari)", "Your Name (optional)")}</label><input className="dy-input" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder={t("k.m. Asha", "e.g. Asha")} /></div>
-            <button className="dy-btn dy-btn-primary" onClick={submit}>{t(`💳 Lipa ${formatTZS(link.amount)}`, `💳 Pay ${formatTZS(link.amount)}`)}</button>
-            <div style={{ textAlign: "center", fontSize: 12, color: "var(--dy-muted)" }}>{t("🔒 Malipo salama kupitia Mixx by Yas", "🔒 Secure payment via Mixx by Yas")}</div>
-            <div style={{ background: "rgba(18,50,116,0.06)", border: "1px solid rgba(18,50,116,0.18)", padding: 12, borderRadius: 10, fontSize: 12.5, color: "var(--dy-navy)", lineHeight: 1.5 }}>
-              ℹ️ {t('Baada ya kubofya "Lipa", utapokea ujumbe wa USSD kwenye simu yako. Ingiza PIN yako ya Mixx ili kukamilisha malipo.', 'After tapping "Pay", you\'ll receive a USSD prompt on your phone. Enter your Mixx PIN to complete payment.')}
+            <button className="dy-btn dy-btn-primary" onClick={submit} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <CreditCard size={16} strokeWidth={2.5} /> {t(`Lipa ${formatTZS(link.amount)}`, `Pay ${formatTZS(link.amount)}`)}
+            </button>
+            <div style={{ textAlign: "center", fontSize: 12, color: "var(--dy-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Lock size={12} strokeWidth={2.5} /> {t("Malipo salama kupitia Mixx by Yas", "Secure payment via Mixx by Yas")}
+            </div>
+            <div style={{ background: "rgba(18,50,116,0.06)", border: "1px solid rgba(18,50,116,0.18)", padding: 12, borderRadius: 10, fontSize: 12.5, color: "var(--dy-navy)", lineHeight: 1.5, display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <Info size={16} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 1 }} />
+              <span>{t('Baada ya kubofya "Lipa", utapokea ujumbe wa USSD kwenye simu yako. Ingiza PIN yako ya Mixx ili kukamilisha malipo.', 'After tapping "Pay", you\'ll receive a USSD prompt on your phone. Enter your Mixx PIN to complete payment.')}</span>
             </div>
           </div>
         </>
@@ -100,7 +106,7 @@ function PayPage() {
 
       {stage === "pending" && (
         <div style={{ display: "grid", placeItems: "center", padding: "60px 20px", textAlign: "center", gap: 18 }}>
-          <div style={{ width: 90, height: 90, borderRadius: "50%", background: "rgba(245,166,35,0.15)", display: "grid", placeItems: "center", fontSize: 44 }}>⏳</div>
+          <div style={{ width: 90, height: 90, borderRadius: "50%", background: "rgba(245,166,35,0.15)", display: "grid", placeItems: "center", color: "var(--dy-yellow)" }}><Clock size={44} strokeWidth={2} /></div>
           <div>
             <div style={{ fontSize: 20, fontWeight: 800 }}>{t("Inasubiri Uthibitisho", "Awaiting Confirmation")}</div>
             <div style={{ fontSize: 28, fontWeight: 900, color: "var(--dy-yellow)", marginTop: 8 }}>{formatTZS(link.amount)}</div>
@@ -114,7 +120,7 @@ function PayPage() {
 
       {stage === "confirmed" && (
         <div style={{ display: "grid", placeItems: "center", padding: "60px 20px", textAlign: "center", gap: 16 }}>
-          <div className="dy-celebrate" style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--dy-green)", color: "#fff", display: "grid", placeItems: "center", fontSize: 48 }}>✓</div>
+          <div className="dy-celebrate" style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--dy-green)", color: "#fff", display: "grid", placeItems: "center" }}><Check size={48} strokeWidth={3} /></div>
           <div style={{ fontSize: 22, fontWeight: 800 }}>{t("Malipo Yamekamilika!", "Payment Complete!")}</div>
           <div style={{ fontSize: 28, fontWeight: 900, color: "var(--dy-green)" }}>{formatTZS(link.amount)}</div>
           <div style={{ fontSize: 14, color: "var(--dy-muted)" }}>{t("Umelipa ", "You paid ")}<b style={{ color: "var(--dy-text)" }}>{merchant?.businessName ?? t("Duka", "Shop")}</b>{t(" kwa mafanikio", " successfully")}</div>
@@ -126,10 +132,12 @@ function PayPage() {
 
       {stage === "failed" && (
         <div style={{ display: "grid", placeItems: "center", padding: "60px 20px", textAlign: "center", gap: 16 }}>
-          <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--dy-red)", color: "#fff", display: "grid", placeItems: "center", fontSize: 48 }}>✕</div>
+          <div style={{ width: 90, height: 90, borderRadius: "50%", background: "var(--dy-red)", color: "#fff", display: "grid", placeItems: "center" }}><X size={48} strokeWidth={3} /></div>
           <div style={{ fontSize: 22, fontWeight: 800 }}>{t("Malipo Yameshindwa", "Payment Failed")}</div>
           <div style={{ fontSize: 14, color: "var(--dy-muted)" }}>{t("Tatizo limetokea wakati wa kuthibitisha malipo yako. Tafadhali jaribu tena.", "Something went wrong while confirming your payment. Please try again.")}</div>
-          <button className="dy-btn dy-btn-primary" style={{ width: "auto", padding: "12px 22px" }} onClick={() => { setStage("form"); setTxId(null); }}>{t("🔁 Jaribu Tena", "🔁 Try Again")}</button>
+          <button className="dy-btn dy-btn-primary" style={{ width: "auto", padding: "12px 22px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }} onClick={() => { setStage("form"); setTxId(null); }}>
+            <RotateCcw size={16} strokeWidth={2.5} /> {t("Jaribu Tena", "Try Again")}
+          </button>
         </div>
       )}
       <footer style={{ borderTop: "1px solid var(--dy-border)", marginTop: 24, padding: "16px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "var(--dy-muted)", fontSize: 11.5 }}>

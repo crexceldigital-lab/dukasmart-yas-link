@@ -37,9 +37,18 @@ export function getGreeting(d = new Date()): string {
   return "Habari za Jioni";
 }
 
-export function categoryEmoji(c: string): string {
-  const m: Record<string,string> = { Fashion:"👕", Food:"🍲", Electronics:"📱", Services:"🛠️", Other:"🛒" };
-  return m[c] ?? "🛒";
+import type { LucideIcon } from "lucide-react";
+import { Shirt, Utensils, Smartphone, Wrench, ShoppingBag } from "lucide-react";
+
+export function categoryIcon(c: string): LucideIcon {
+  const m: Record<string, LucideIcon> = {
+    Fashion: Shirt,
+    Food: Utensils,
+    Electronics: Smartphone,
+    Services: Wrench,
+    Other: ShoppingBag,
+  };
+  return m[c] ?? ShoppingBag;
 }
 
 export function slugify(s: string): string {

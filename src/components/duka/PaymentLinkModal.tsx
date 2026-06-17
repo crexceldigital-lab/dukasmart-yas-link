@@ -4,6 +4,7 @@ import { useDuka, type PaymentLink } from "@/lib/duka/store";
 import { formatTZS } from "@/lib/duka/utils";
 import { useToast } from "./Toast";
 import { useI18n } from "@/lib/duka/i18n";
+import { Package, Pencil, Zap, MessageCircle, Copy, Check, PartyPopper, ArrowLeft } from "lucide-react";
 
 export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { products, createLink, merchant } = useDuka();
@@ -36,29 +37,29 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
 
   const copy = async () => {
     if (!url) return;
-    try { await navigator.clipboard.writeText(url); setCopied(true); toast(t("Imenakiliwa! ✓", "Copied! ✓")); setTimeout(() => setCopied(false), 2000); } catch {}
+    try { await navigator.clipboard.writeText(url); setCopied(true); toast(t("Imenakiliwa!", "Copied!")); setTimeout(() => setCopied(false), 2000); } catch {}
   };
   const whatsapp = () => {
     if (!url || !link) return;
     const lines = lang === "en" ? [
       `*DUKA SMART* — Payment Request`,
       ``,
-      `Hello! 👋 Please complete your payment:`,
+      `Hello! Please complete your payment:`,
       ``,
-      `🛒 Item: ${link.label}`,
-      `💰 Amount: ${formatTZS(link.amount)}`,
-      `🔗 Payment Link: ${url}`,
+      `Item: ${link.label}`,
+      `Amount: ${formatTZS(link.amount)}`,
+      `Payment Link: ${url}`,
       ``,
       `Pay securely via *Mixx by Yas*.`,
       `— ${merchant?.businessName ?? "DUKA SMART"}`,
     ].join("\n") : [
       `*DUKA SMART* — Ombi la Malipo`,
       ``,
-      `Habari! 👋 Tafadhali kamilisha malipo yako:`,
+      `Habari! Tafadhali kamilisha malipo yako:`,
       ``,
-      `🛒 Bidhaa: ${link.label}`,
-      `💰 Kiasi: ${formatTZS(link.amount)}`,
-      `🔗 Kiungo cha Malipo: ${url}`,
+      `Bidhaa: ${link.label}`,
+      `Kiasi: ${formatTZS(link.amount)}`,
+      `Kiungo cha Malipo: ${url}`,
       ``,
       `Lipa salama kupitia *Mixx by Yas*.`,
       `— ${merchant?.businessName ?? "DUKA SMART"}`,
@@ -67,12 +68,12 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
   };
 
   return (
-    <Modal open={open} onClose={close} title={link ? t("🎉 Kiungo Kimeundwa!", "🎉 Link Created!") : t("Unda Kiungo cha Malipo", "Create Payment Link")} subtitle={link ? undefined : t("Shiriki kiungo na mnunuzi wako — watalipa kwa Mixx by Yas", "Share the link with your buyer — they'll pay via Mixx by Yas")}>
+    <Modal open={open} onClose={close} title={link ? t("Kiungo Kimeundwa!", "Link Created!") : t("Unda Kiungo cha Malipo", "Create Payment Link")} subtitle={link ? undefined : t("Shiriki kiungo na mnunuzi wako — watalipa kwa Mixx by Yas", "Share the link with your buyer — they'll pay via Mixx by Yas")}>
       {!link ? (
         <div style={{ display: "grid", gap: 14 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, background: "#F0F4F8", padding: 4, borderRadius: 12 }}>
-            <button onClick={() => setMode("product")} className="dy-btn" style={{ background: mode==="product" ? "#fff" : "transparent", color: "var(--dy-text)", boxShadow: mode==="product" ? "0 1px 4px rgba(0,0,0,0.08)" : "none", minHeight: 40 }}>{t("📦 Bidhaa", "📦 Product")}</button>
-            <button onClick={() => setMode("custom")} className="dy-btn" style={{ background: mode==="custom" ? "#fff" : "transparent", color: "var(--dy-text)", boxShadow: mode==="custom" ? "0 1px 4px rgba(0,0,0,0.08)" : "none", minHeight: 40 }}>{t("✍️ Kiasi Maalum", "✍️ Custom Amount")}</button>
+            <button onClick={() => setMode("product")} className="dy-btn" style={{ background: mode==="product" ? "#fff" : "transparent", color: "var(--dy-text)", boxShadow: mode==="product" ? "0 1px 4px rgba(0,0,0,0.08)" : "none", minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Package size={14} strokeWidth={2.5} /> {t("Bidhaa", "Product")}</button>
+            <button onClick={() => setMode("custom")} className="dy-btn" style={{ background: mode==="custom" ? "#fff" : "transparent", color: "var(--dy-text)", boxShadow: mode==="custom" ? "0 1px 4px rgba(0,0,0,0.08)" : "none", minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Pencil size={14} strokeWidth={2.5} /> {t("Kiasi Maalum", "Custom Amount")}</button>
           </div>
           {mode === "product" ? (
             <div>
@@ -94,21 +95,21 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
               </div>
             </>
           )}
-          <button className="dy-btn dy-btn-primary" onClick={submit}>{t("⚡ Unda Kiungo", "⚡ Create Link")}</button>
+          <button className="dy-btn dy-btn-primary" onClick={submit} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}><Zap size={16} strokeWidth={2.5} /> {t("Unda Kiungo", "Create Link")}</button>
         </div>
       ) : (
         <div style={{ display: "grid", gap: 14, textAlign: "center" }}>
-          <div style={{ fontSize: 40 }} className="dy-celebrate">🎉</div>
+          <div className="dy-celebrate" style={{ color: "var(--dy-green)", display: "inline-flex", justifyContent: "center" }}><PartyPopper size={44} strokeWidth={2} /></div>
           <div>
             <div style={{ fontSize: 14, color: "var(--dy-muted)" }}>{link.label}</div>
             <div style={{ fontSize: 30, fontWeight: 900, color: "var(--dy-green)" }}>{formatTZS(link.amount)}</div>
           </div>
           <div style={{ background: "#F0F4F8", padding: 12, borderRadius: 10, fontSize: 13, color: "var(--dy-navy)", wordBreak: "break-all", textAlign: "left", fontWeight: 600 }}>{url}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <button className="dy-btn" style={{ background: "#25D366", color: "#fff" }} onClick={whatsapp}>📱 WhatsApp</button>
-            <button className="dy-btn dy-btn-ghost" onClick={copy}>{copied ? t("✓ Imenakiliwa!", "✓ Copied!") : t("📋 Nakili", "📋 Copy")}</button>
+            <button className="dy-btn" style={{ background: "#25D366", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }} onClick={whatsapp}><MessageCircle size={16} strokeWidth={2.5} /> WhatsApp</button>
+            <button className="dy-btn dy-btn-ghost" onClick={copy} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{copied ? <><Check size={16} strokeWidth={2.5} /> {t("Imenakiliwa!", "Copied!")}</> : <><Copy size={16} strokeWidth={2.5} /> {t("Nakili", "Copy")}</>}</button>
           </div>
-          <button className="dy-btn dy-btn-ghost" onClick={reset}>{t("← Unda Kiungo Kingine", "← Create Another Link")}</button>
+          <button className="dy-btn dy-btn-ghost" onClick={reset} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}><ArrowLeft size={16} strokeWidth={2.5} /> {t("Unda Kiungo Kingine", "Create Another Link")}</button>
         </div>
       )}
     </Modal>

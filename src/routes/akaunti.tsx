@@ -5,6 +5,7 @@ import { AuthGuard } from "@/components/duka/Guard";
 import { useDuka } from "@/lib/duka/store";
 import { useToast } from "@/components/duka/Toast";
 import { useI18n } from "@/lib/duka/i18n";
+import { Save, LogOut, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/akaunti")({
   head: () => ({ meta: [{ title: "Akaunti — DUKA SMART" }, { name: "description", content: "Wasifu wako na mipangilio ya duka." }] }),
@@ -30,7 +31,7 @@ function Akaunti() {
   const save = () => {
     if (!form.businessName.trim()) { toast(t("Weka jina la biashara", "Enter a business name")); return; }
     updateProfile({ ...form, bio: form.bio.slice(0, 120) });
-    toast(t("✅ Mabadiliko yamehifadhiwa", "✅ Changes saved"));
+    toast(t("Mabadiliko yamehifadhiwa", "Changes saved"));
   };
 
   return (
@@ -58,8 +59,12 @@ function Akaunti() {
           <div><label className="dy-label">{t(`Maelezo (${120 - form.bio.length} kushoto)`, `Description (${120 - form.bio.length} left)`)}</label>
             <textarea className="dy-input" rows={3} maxLength={120} value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
           </div>
-          <button className="dy-btn dy-btn-primary" onClick={save}>{t("💾 Hifadhi Mabadiliko", "💾 Save Changes")}</button>
-          <button className="dy-btn dy-btn-danger-ghost" onClick={() => { if (confirm(t("Toka nje ya akaunti?", "Sign out of your account?"))) { logout(); navigate({ to: "/login" }); } }}>{t("🚪 Toka (Logout)", "🚪 Log Out")}</button>
+          <button className="dy-btn dy-btn-primary" onClick={save} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <Save size={16} strokeWidth={2.5} /> {t("Hifadhi Mabadiliko", "Save Changes")}
+          </button>
+          <button className="dy-btn dy-btn-danger-ghost" onClick={() => { if (confirm(t("Toka nje ya akaunti?", "Sign out of your account?"))) { logout(); navigate({ to: "/login" }); } }} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <LogOut size={16} strokeWidth={2.5} /> {t("Toka (Logout)", "Log Out")}
+          </button>
         </div>
 
         <div style={{ textAlign: "center", padding: "10px 0 20px", color: "var(--dy-muted)", fontSize: 11.5, lineHeight: 1.6 }}>

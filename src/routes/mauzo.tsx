@@ -5,6 +5,7 @@ import { useDuka } from "@/lib/duka/store";
 import { formatTZS, formatDate } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 import { useI18n } from "@/lib/duka/i18n";
+import { Inbox, Check, Clock, X } from "lucide-react";
 
 export const Route = createFileRoute("/mauzo")({
   head: () => ({ meta: [{ title: "Mauzo — DUKA SMART" }, { name: "description", content: "Historia kamili ya mauzo yako." }] }),
@@ -26,7 +27,7 @@ function Mauzo() {
 
         {transactions.length === 0 ? (
           <div className="dy-card" style={{ textAlign: "center", padding: 30 }}>
-            <div style={{ fontSize: 44 }}>📭</div>
+            <Inbox size={44} strokeWidth={1.5} color="var(--dy-muted)" />
             <div style={{ fontWeight: 800, marginTop: 8 }}>{t("Hakuna Mauzo Bado", "No Sales Yet")}</div>
             <p style={{ fontSize: 13, color: "var(--dy-muted)" }}>{t("Mauzo yataonekana hapa baada ya mteja kulipa", "Sales will appear here once a customer pays")}</p>
           </div>
@@ -34,10 +35,12 @@ function Mauzo() {
           <div className="dy-card" style={{ padding: 0, overflow: "hidden" }}>
             {transactions.map((t, i) => {
               const colors = { confirmed: "var(--dy-green)", pending: "var(--dy-yellow)", failed: "var(--dy-red)" } as const;
-              const icon = t.status === "confirmed" ? "✓" : t.status === "pending" ? "⏳" : "✕";
+              const Icon = t.status === "confirmed" ? Check : t.status === "pending" ? Clock : X;
               return (
                 <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderTop: i === 0 ? "none" : "1px solid var(--dy-border)" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: colors[t.status] + "22", color: colors[t.status], display: "grid", placeItems: "center", fontSize: 16, fontWeight: 800, flexShrink: 0 }}>{icon}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: colors[t.status] + "22", color: colors[t.status], display: "grid", placeItems: "center", flexShrink: 0 }}>
+                    <Icon size={18} strokeWidth={2.5} />
+                  </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.productName}</div>
                     <div style={{ fontSize: 11.5, color: "var(--dy-muted)" }}>{formatDate(t.createdAt)} • {t.buyerPhone ?? "—"}</div>
