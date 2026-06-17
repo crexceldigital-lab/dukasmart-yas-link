@@ -38,7 +38,7 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
   };
   const whatsapp = () => {
     if (!url || !link) return;
-    const text = encodeURIComponent(`Habari! Tafadhali lipa ${formatTZS(link.amount)} kwa ${link.label} kupitia Mixx by Yas:\n${url}\n— ${merchant?.businessName ?? "Duka Yangu"}`);
+    const text = encodeURIComponent(`Habari! Tafadhali lipa ${formatTZS(link.amount)} kwa ${link.label} kupitia Mixx by Yas:\n${url}\n— ${merchant?.businessName ?? "DUKA SMART"}`);
     window.open("https://wa.me/?text=" + text, "_blank");
   };
 

@@ -6,7 +6,7 @@ import { getTier, TIERS } from "@/lib/duka/utils";
 import { CreditRing } from "@/components/duka/CreditRing";
 
 export const Route = createFileRoute("/afya")({
-  head: () => ({ meta: [{ title: "Afya ya Biashara — Duka Yangu" }, { name: "description", content: "Tazama kiwango chako cha mkopo na jinsi ya kukikuza." }] }),
+  head: () => ({ meta: [{ title: "Afya ya Biashara — DUKA SMART" }, { name: "description", content: "Tazama kiwango chako cha mkopo na jinsi ya kukikuza." }] }),
   component: () => (<AuthGuard><Shell><Afya /></Shell></AuthGuard>),
 });
 

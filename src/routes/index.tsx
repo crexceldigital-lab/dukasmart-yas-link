@@ -9,7 +9,7 @@ import { PaymentLinkModal } from "@/components/duka/PaymentLinkModal";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Nyumbani — Duka Yangu" },
+    { title: "Nyumbani — DUKA SMART" },
     { name: "description", content: "Dashibodi yako ya biashara. Tazama mauzo, kuunda viungo vya malipo na zaidi." },
   ] }),
   component: () => (<AuthGuard><Shell><Dashboard /></Shell></AuthGuard>),

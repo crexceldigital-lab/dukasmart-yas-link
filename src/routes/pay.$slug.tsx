@@ -4,7 +4,7 @@ import { useDuka } from "@/lib/duka/store";
 import { formatTZS, categoryEmoji } from "@/lib/duka/utils";
 
 export const Route = createFileRoute("/pay/$slug")({
-  head: () => ({ meta: [{ title: "Lipa kwa Mixx by Yas — Duka Yangu" }, { name: "description", content: "Lipa salama kupitia Mixx by Yas." }] }),
+  head: () => ({ meta: [{ title: "Lipa kwa Mixx by Yas — DUKA SMART" }, { name: "description", content: "Lipa salama kupitia Mixx by Yas." }] }),
   component: PayPage,
 });
 
@@ -107,7 +107,7 @@ function PayPage() {
           <div style={{ fontSize: 14, color: "var(--dy-muted)" }}>Umelipa <b style={{ color: "var(--dy-text)" }}>{merchant?.businessName ?? "Duka"}</b> kwa mafanikio</div>
           {ref ? <div style={{ background: "#F0F4F8", padding: 12, borderRadius: 10, fontFamily: "ui-monospace, Menlo, monospace", fontSize: 14, color: "var(--dy-text)" }}>Risiti: {ref}</div> : null}
           <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>Risiti imetumwa kwa nambari yako ya Mixx</div>
-          <div style={{ marginTop: 30, fontSize: 11.5, color: "var(--dy-muted)" }}>Powered by Duka Yangu × Mixx by Yas</div>
+          <div style={{ marginTop: 30, fontSize: 11.5, color: "var(--dy-muted)" }}>Powered by DUKA SMART × Mixx by Yas</div>
         </div>
       )}
 

@@ -5,7 +5,7 @@ import { useToast } from "@/components/duka/Toast";
 import { normalizePhone } from "@/lib/duka/utils";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Karibu — Duka Yangu" }, { name: "description", content: "Ingia kwenye Duka Yangu kwa nambari yako ya YAS." }] }),
+  head: () => ({ meta: [{ title: "Karibu — DUKA SMART" }, { name: "description", content: "Ingia kwenye DUKA SMART kwa nambari yako ya YAS." }] }),
   component: LoginPage,
 });
 
