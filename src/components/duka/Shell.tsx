@@ -2,14 +2,21 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { YasLogo } from "./YasLogo";
 import { LangToggle, useI18n } from "@/lib/duka/i18n";
+import { useDuka } from "@/lib/duka/store";
+import { ProBadge } from "./ProBadge";
 
 export function Topbar({ title, subtitle, right }: { title: ReactNode; subtitle?: ReactNode; right?: ReactNode }) {
+  const { merchant } = useDuka();
+  const isPro = merchant?.plan === "pro";
   return (
     <div className="dy-topbar">
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
         <YasLogo size={32} />
         <div style={{ minWidth: 0, flex: 1 }}>
-          <h1 style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
+          <h1 style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{title}</span>
+            {isPro ? <ProBadge /> : null}
+          </h1>
           {subtitle ? <div className="sub">{subtitle}</div> : null}
         </div>
       </div>
