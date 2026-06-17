@@ -47,47 +47,40 @@ export function useI18n(): Ctx {
 
 export function LangToggle({ compact = false }: { compact?: boolean }) {
   const { lang, setLang } = useI18n();
-  const btn = (val: Lang, label: string) => (
-    <button
-      key={val}
-      type="button"
-      onClick={() => setLang(val)}
-      aria-pressed={lang === val}
-      aria-label={val === "sw" ? "Swahili" : "English"}
-      style={{
-        minWidth: compact ? 28 : 32,
-        height: compact ? 24 : 28,
-        padding: "0 8px",
-        border: "none",
-        background: lang === val ? "var(--dy-yellow)" : "transparent",
-        color: lang === val ? "var(--dy-navy)" : "currentColor",
-        fontWeight: 800,
-        fontSize: 11,
-        letterSpacing: "0.04em",
-        borderRadius: 999,
-        cursor: "pointer",
-        transition: "background 150ms ease",
-      }}
-    >
-      {label}
-    </button>
-  );
+  const next: Lang = lang === "sw" ? "en" : "sw";
+  const currentLabel = lang === "sw" ? "SW" : "EN";
+  const nextLabel = next === "sw" ? "Kiswahili" : "English";
   return (
-    <div
-      role="group"
-      aria-label="Language"
+    <button
+      type="button"
+      onClick={() => setLang(next)}
+      aria-label={`Switch language to ${nextLabel}`}
+      title={`Switch to ${nextLabel}`}
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 2,
-        padding: 3,
+        gap: 6,
+        height: compact ? 28 : 32,
+        padding: "0 10px",
+        border: "1px solid rgba(255,255,255,0.35)",
+        background: "var(--dy-yellow)",
+        color: "var(--dy-navy)",
+        fontWeight: 800,
+        fontSize: 12,
+        letterSpacing: "0.04em",
         borderRadius: 999,
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.18)",
+        cursor: "pointer",
+        transition: "transform 150ms ease, background 150ms ease",
+        flexShrink: 0,
+        WebkitTapHighlightColor: "transparent",
       }}
     >
-      {btn("sw", "SW")}
-      {btn("en", "EN")}
-    </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18" />
+        <path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z" />
+      </svg>
+      {currentLabel}
+    </button>
   );
 }
