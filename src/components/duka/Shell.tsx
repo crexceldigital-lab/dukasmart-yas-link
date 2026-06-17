@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { YasLogo } from "./YasLogo";
+import { LangToggle, useI18n } from "@/lib/duka/i18n";
 
 export function Topbar({ title, subtitle, right }: { title: ReactNode; subtitle?: ReactNode; right?: ReactNode }) {
   return (
@@ -12,21 +13,24 @@ export function Topbar({ title, subtitle, right }: { title: ReactNode; subtitle?
           {subtitle ? <div className="sub">{subtitle}</div> : null}
         </div>
       </div>
-      {right}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        <LangToggle />
+        {right}
+      </div>
     </div>
   );
 }
 
-const tabs: { to: string; label: string; icon: ReactNode }[] = [
-  { to: "/", label: "Nyumbani", icon: <HomeIcon /> },
-  { to: "/bidhaa", label: "Bidhaa", icon: <BoxIcon /> },
-  { to: "/mauzo", label: "Mauzo", icon: <TrendIcon /> },
-  { to: "/afya", label: "Afya", icon: <StarIcon /> },
-  { to: "/akaunti", label: "Akaunti", icon: <UserIcon /> },
-];
-
 export function BottomNav() {
   const path = useRouterState({ select: s => s.location.pathname });
+  const { t } = useI18n();
+  const tabs: { to: string; label: string; icon: ReactNode }[] = [
+    { to: "/",        label: t("Nyumbani", "Home"),     icon: <HomeIcon /> },
+    { to: "/bidhaa",  label: t("Bidhaa",   "Products"), icon: <BoxIcon /> },
+    { to: "/mauzo",   label: t("Mauzo",    "Sales"),    icon: <TrendIcon /> },
+    { to: "/afya",    label: t("Afya",     "Health"),   icon: <StarIcon /> },
+    { to: "/akaunti", label: t("Akaunti",  "Account"),  icon: <UserIcon /> },
+  ];
   return (
     <nav className="dy-bottom-nav">
       {tabs.map(t => {
