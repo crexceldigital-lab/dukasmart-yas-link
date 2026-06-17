@@ -4,6 +4,7 @@ import { AuthGuard } from "@/components/duka/Guard";
 import { useDuka } from "@/lib/duka/store";
 import { getTier, TIERS } from "@/lib/duka/utils";
 import { CreditRing } from "@/components/duka/CreditRing";
+import { useI18n } from "@/lib/duka/i18n";
 
 export const Route = createFileRoute("/afya")({
   head: () => ({ meta: [{ title: "Afya ya Biashara — DUKA SMART" }, { name: "description", content: "Tazama kiwango chako cha mkopo na jinsi ya kukikuza." }] }),
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/afya")({
 
 function Afya() {
   const { merchant } = useDuka();
+  const { t, lang } = useI18n();
   if (!merchant) return null;
   const score = merchant.creditScore;
   const tier = getTier(score);
@@ -20,29 +22,29 @@ function Afya() {
 
   return (
     <>
-      <Topbar title="Afya ya Biashara" subtitle="Rekodi yako ya biashara" />
+      <Topbar title={t("Afya ya Biashara", "Business Health")} subtitle={t("Rekodi yako ya biashara", "Your business record")} />
       <div style={{ padding: 16, display: "grid", gap: 16 }}>
         <div className="dy-card" style={{ paddingTop: 24, textAlign: "center" }}>
           <CreditRing score={score} />
-          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--dy-text)", marginTop: 12 }}>{tier.english}</div>
-          {next ? <div style={{ fontSize: 12.5, color: "var(--dy-muted)", marginTop: 4 }}>Pointi {pointsToNext} zinakupeleka kiwango cha <b style={{ color: next.color }}>{next.swahili}</b></div> : <div style={{ fontSize: 12.5, color: "var(--dy-green)", marginTop: 4, fontWeight: 700 }}>Umefika kiwango cha juu kabisa! 🎉</div>}
+          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--dy-text)", marginTop: 12 }}>{lang === "en" ? tier.english : tier.swahili}</div>
+          {next ? <div style={{ fontSize: 12.5, color: "var(--dy-muted)", marginTop: 4 }}>{t(`Pointi ${pointsToNext} zinakupeleka kiwango cha `, `${pointsToNext} points to tier `)}<b style={{ color: next.color }}>{lang === "en" ? next.english : next.swahili}</b></div> : <div style={{ fontSize: 12.5, color: "var(--dy-green)", marginTop: 4, fontWeight: 700 }}>{t("Umefika kiwango cha juu kabisa! 🎉", "You've reached the top tier! 🎉")}</div>}
         </div>
 
         <div className="dy-card" style={{ padding: 0 }}>
-          {TIERS.map((t, i) => {
-            const active = t.swahili === tier.swahili;
+          {TIERS.map((tierItem, i) => {
+            const active = tierItem.swahili === tier.swahili;
             return (
-              <div key={t.swahili} style={{
+              <div key={tierItem.swahili} style={{
                 display: "flex", alignItems: "center", gap: 12, padding: 14,
                 borderTop: i === 0 ? "none" : "1px solid var(--dy-border)",
                 background: active ? "rgba(18,50,116,0.06)" : "transparent",
                 border: active ? "1.5px solid var(--dy-navy)" : undefined,
                 borderRadius: active ? 12 : 0, margin: active ? 6 : 0,
               }}>
-                <div style={{ width: 14, height: 14, borderRadius: "50%", background: t.color, flexShrink: 0 }} />
+                <div style={{ width: 14, height: 14, borderRadius: "50%", background: tierItem.color, flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 800 }}>{t.swahili} <span style={{ color: "var(--dy-muted)", fontWeight: 500, fontSize: 12 }}>({t.min}-{t.max})</span></div>
-                  <div style={{ fontSize: 12, color: "var(--dy-muted)", marginTop: 2 }}>{t.benefit}</div>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>{lang === "en" ? tierItem.english : tierItem.swahili} <span style={{ color: "var(--dy-muted)", fontWeight: 500, fontSize: 12 }}>({tierItem.min}-{tierItem.max})</span></div>
+                  <div style={{ fontSize: 12, color: "var(--dy-muted)", marginTop: 2 }}>{tierItem.benefit}</div>
                 </div>
                 {active ? <div style={{ fontSize: 20 }}>👈</div> : null}
               </div>
@@ -51,7 +53,7 @@ function Afya() {
         </div>
 
         <div style={{ background: "rgba(18,50,116,0.06)", border: "1px solid rgba(18,50,116,0.18)", color: "var(--dy-navy)", padding: 14, borderRadius: 12, fontSize: 13 }}>
-          💡 <b>Vidokezo:</b> Kuza Afya yako kwa kuuza mara kwa mara, kuwa na bidhaa nyingi zinazopatikana, na kupokea malipo kwa Mixx by Yas.
+          💡 <b>{t("Vidokezo:", "Tips:")}</b> {t("Kuza Afya yako kwa kuuza mara kwa mara, kuwa na bidhaa nyingi zinazopatikana, na kupokea malipo kwa Mixx by Yas.", "Grow your Health by selling regularly, keeping more products available, and accepting payments via Mixx by Yas.")}
         </div>
       </div>
     </>
