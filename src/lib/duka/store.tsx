@@ -22,6 +22,7 @@ export type Product = {
   id: string;
   name: string;
   priceTzs: number;
+  buyingPriceTzs?: number;
   description?: string;
   photoUrl?: string;
   stockCount?: number;
@@ -66,6 +67,24 @@ export type Customer = {
   lastPurchase: string;
 };
 
+export type Restock = {
+  id: string;
+  productId: string;
+  quantity: number;
+  newBuyingPrice?: number;
+  createdAt: string;
+};
+
+export type ExpenseCategory = "rent" | "transport" | "supplies" | "wages" | "utilities" | "other";
+export type Expense = {
+  id: string;
+  amount: number;
+  category: ExpenseCategory;
+  note?: string;
+  date: string; // ISO date string (yyyy-mm-dd or full ISO)
+  createdAt: string;
+};
+
 const DEMO_MERCHANT: Merchant = {
   merchantId: "a0000000-0000-0000-0000-000000000001",
   dukaId: "DY-00001",
@@ -83,9 +102,9 @@ const DEMO_MERCHANT: Merchant = {
 };
 
 const DEMO_PRODUCTS: Product[] = [
-  { id: "p1", name: "AB Classic Hoodie",  priceTzs: 65000,  isAvailable: true,  unitsSold: 42, stockCount: 12 },
-  { id: "p2", name: "AB Graphic Tee",     priceTzs: 35000,  isAvailable: true,  unitsSold: 67, stockCount: 28 },
-  { id: "p3", name: "AB Cap Snapback",    priceTzs: 25000,  isAvailable: true,  unitsSold: 31, stockCount: 18 },
+  { id: "p1", name: "AB Classic Hoodie",  priceTzs: 65000,  buyingPriceTzs: 42000, isAvailable: true,  unitsSold: 42, stockCount: 12 },
+  { id: "p2", name: "AB Graphic Tee",     priceTzs: 35000,  buyingPriceTzs: 20000, isAvailable: true,  unitsSold: 67, stockCount: 28 },
+  { id: "p3", name: "AB Cap Snapback",    priceTzs: 25000,  buyingPriceTzs: 14000, isAvailable: true,  unitsSold: 31, stockCount: 18 },
   { id: "p4", name: "AB Tracksuit Set",   priceTzs: 120000, isAvailable: false, unitsSold: 8,  stockCount: 0  },
   { id: "p5", name: "AB Bucket Hat",      priceTzs: 20000,  isAvailable: true,  unitsSold: 22, stockCount: 14 },
 ];
@@ -125,7 +144,10 @@ type Ctx = {
   rewards: Reward[];
   links: PaymentLink[];
   customers: Customer[];
+  restocks: Restock[];
+  expenses: Expense[];
   stats: { today: { total: number; count: number }, week: { total: number; count: number }, month: { total: number; count: number }, allTime: { total: number; count: number } };
+  finance: { monthProfit: number; monthCostOfGoods: number; monthExpenses: number; prevMonthExpenses: number };
   login: (merchant: Merchant, role?: SessionRole) => void;
   logout: () => void;
   updateProfile: (patch: Partial<Merchant>) => void;
@@ -138,6 +160,9 @@ type Ctx = {
   updateProduct: (id: string, patch: Partial<Product>) => void;
   toggleProduct: (id: string) => void;
   deleteProduct: (id: string) => void;
+  restockProduct: (productId: string, quantity: number, newBuyingPrice?: number) => void;
+  addExpense: (e: Omit<Expense,"id"|"createdAt">) => Expense;
+  deleteExpense: (id: string) => void;
   createLink: (opts: { productId?: string; customAmountTzs?: number; customLabel?: string; buyerName?: string; buyerPhone?: string }) => PaymentLink;
   getLink: (slug: string) => PaymentLink | undefined;
   startTransaction: (slug: string, buyerPhone: string, buyerName?: string) => Transaction;
@@ -157,6 +182,8 @@ type Persist = {
   transactions: Transaction[];
   rewards: Reward[];
   links: PaymentLink[];
+  restocks?: Restock[];
+  expenses?: Expense[];
 };
 
 function loadPersist(): Persist | null {
@@ -179,6 +206,8 @@ export function DukaProvider({ children }: { children: ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [links, setLinks] = useState<PaymentLink[]>([]);
+  const [restocks, setRestocks] = useState<Restock[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -192,14 +221,16 @@ export function DukaProvider({ children }: { children: ReactNode }) {
       setTransactions(p.transactions);
       setRewards(p.rewards);
       setLinks(p.links);
+      setRestocks(p.restocks ?? []);
+      setExpenses(p.expenses ?? []);
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
     if (!merchant) return;
-    savePersist({ merchant, products, transactions, rewards, links });
-  }, [merchant, products, transactions, rewards, links]);
+    savePersist({ merchant, products, transactions, rewards, links, restocks, expenses });
+  }, [merchant, products, transactions, rewards, links, restocks, expenses]);
 
   const stats = useMemo(() => {
     const now = Date.now();
@@ -246,8 +277,37 @@ export function DukaProvider({ children }: { children: ReactNode }) {
     return Array.from(map.values()).sort((a, b) => b.totalSpent - a.totalSpent);
   }, [transactions]);
 
+  const finance = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth();
+    const monthStart = new Date(y, m, 1).getTime();
+    const nextMonthStart = new Date(y, m + 1, 1).getTime();
+    const prevMonthStart = new Date(y, m - 1, 1).getTime();
+    const prodMap = new Map(products.map(p => [p.id, p]));
+    let monthProfit = 0, monthCostOfGoods = 0;
+    for (const t of transactions) {
+      if (t.status !== "confirmed") continue;
+      const ts = new Date(t.createdAt).getTime();
+      if (ts < monthStart || ts >= nextMonthStart) continue;
+      if (!t.productId) continue;
+      const p = prodMap.get(t.productId);
+      if (!p || p.buyingPriceTzs == null) continue;
+      const profitPerUnit = p.priceTzs - p.buyingPriceTzs;
+      // Single unit per tx in this demo model
+      monthProfit += profitPerUnit;
+      monthCostOfGoods += p.buyingPriceTzs;
+    }
+    let monthExpenses = 0, prevMonthExpenses = 0;
+    for (const e of expenses) {
+      const ts = new Date(e.date).getTime();
+      if (ts >= monthStart && ts < nextMonthStart) monthExpenses += e.amount;
+      else if (ts >= prevMonthStart && ts < monthStart) prevMonthExpenses += e.amount;
+    }
+    return { monthProfit, monthCostOfGoods, monthExpenses, prevMonthExpenses };
+  }, [transactions, products, expenses]);
+
   const value: Ctx = {
-    merchant, loading, sessionRole, products, transactions, rewards, links, customers, stats,
+    merchant, loading, sessionRole, products, transactions, rewards, links, customers, restocks, expenses, stats, finance,
     login(m, role = "owner") {
       setMerchant(m);
       setSessionRole(role);
@@ -265,7 +325,7 @@ export function DukaProvider({ children }: { children: ReactNode }) {
       }
     },
     logout() {
-      setMerchant(null); setSessionRole("owner"); setProducts([]); setTransactions([]); setRewards([]); setLinks([]);
+      setMerchant(null); setSessionRole("owner"); setProducts([]); setTransactions([]); setRewards([]); setLinks([]); setRestocks([]); setExpenses([]);
       if (typeof window !== "undefined") {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(KEY);
@@ -305,6 +365,24 @@ export function DukaProvider({ children }: { children: ReactNode }) {
     updateProduct(id, patch) { setProducts(list => list.map(x => x.id === id ? { ...x, ...patch } : x)); },
     toggleProduct(id) { setProducts(list => list.map(x => x.id === id ? { ...x, isAvailable: !x.isAvailable } : x)); },
     deleteProduct(id) { setProducts(list => list.filter(x => x.id !== id)); },
+    restockProduct(productId, quantity, newBuyingPrice) {
+      if (!quantity || quantity <= 0) return;
+      setProducts(list => list.map(p => p.id === productId
+        ? { ...p, stockCount: (p.stockCount ?? 0) + quantity, ...(newBuyingPrice != null ? { buyingPriceTzs: newBuyingPrice } : {}) }
+        : p));
+      const log: Restock = {
+        id: "rs" + Math.random().toString(36).slice(2,8),
+        productId, quantity, newBuyingPrice,
+        createdAt: new Date().toISOString(),
+      };
+      setRestocks(list => [log, ...list]);
+    },
+    addExpense(e) {
+      const ne: Expense = { id: "e" + Math.random().toString(36).slice(2,8), createdAt: new Date().toISOString(), ...e };
+      setExpenses(list => [ne, ...list]);
+      return ne;
+    },
+    deleteExpense(id) { setExpenses(list => list.filter(e => e.id !== id)); },
     createLink({ productId, customAmountTzs, customLabel }) {
       let amount = 0, label = "Kiasi Maalum", photo: string | undefined, desc: string | undefined;
       if (productId) {

@@ -7,7 +7,7 @@ import { formatTZS, categoryIcon } from "@/lib/duka/utils";
 import { Modal } from "@/components/duka/Modal";
 import { useToast } from "@/components/duka/Toast";
 import { useI18n } from "@/lib/duka/i18n";
-import { Package, Plus, Pencil, ToggleLeft, Trash2, Save, CheckCircle2, Upload, X, ImageIcon, AlertTriangle, FileText } from "lucide-react";
+import { Package, Plus, Pencil, ToggleLeft, Trash2, Save, CheckCircle2, Upload, X, ImageIcon, AlertTriangle, FileText, PackagePlus, TrendingUp } from "lucide-react";
 import { useProGate } from "@/lib/duka/useProGate";
 import { generateCatalogue } from "@/lib/duka/pdfCatalogue";
 
@@ -17,13 +17,15 @@ export const Route = createFileRoute("/bidhaa")({
 });
 
 function Bidhaa() {
-  const { products, merchant, addProduct, updateProduct, toggleProduct, deleteProduct } = useDuka();
+  const { products, merchant, addProduct, updateProduct, toggleProduct, deleteProduct, restockProduct } = useDuka();
   const toast = useToast();
   const { t } = useI18n();
   const { isPro, openUpgrade, requirePro } = useProGate();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [dismissLow, setDismissLow] = useState(false);
+  const [restockingId, setRestockingId] = useState<string | null>(null);
+  const [restockQty, setRestockQty] = useState("");
 
   const startAdd = () => {
     if (!isPro && products.length >= 20) { openUpgrade(); return; }
@@ -99,11 +101,44 @@ function Bidhaa() {
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.2, minHeight: 32 }}>{p.name}</div>
                 <div style={{ fontSize: 14, fontWeight: 900, color: "var(--dy-green)" }}>{formatTZS(p.priceTzs)}</div>
+                {isPro && p.buyingPriceTzs != null && (
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--dy-green)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <TrendingUp size={11} strokeWidth={2.5} />
+                    {t("Faida:", "Profit:")} {formatTZS(p.priceTzs - p.buyingPriceTzs)} {t("/ moja", "/ each")}
+                  </div>
+                )}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
                   <IconBtn title={t("Hariri", "Edit")} onClick={() => startEdit(p)}><Pencil size={14} strokeWidth={2.5} /></IconBtn>
                   <IconBtn title={t("Geuza", "Toggle")} onClick={() => { toggleProduct(p.id); toast(p.isAvailable ? t("Imefichwa", "Hidden") : t("Inapatikana", "Available")); }}><ToggleLeft size={14} strokeWidth={2.5} /></IconBtn>
                   <IconBtn title={t("Futa", "Delete")} color="#E74C3C" onClick={() => { if (confirm(t(`Futa "${p.name}"?`, `Delete "${p.name}"?`))) { deleteProduct(p.id); toast(t("Imefutwa", "Deleted")); } }}><Trash2 size={14} strokeWidth={2.5} /></IconBtn>
                 </div>
+                {isPro && (
+                  restockingId === p.id ? (
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <input
+                        autoFocus className="dy-input" inputMode="numeric"
+                        placeholder={t("Kiasi?", "Qty?")} value={restockQty}
+                        onChange={e => setRestockQty(e.target.value.replace(/\D/g, ""))}
+                        style={{ minHeight: 36, padding: "6px 10px", fontSize: 13 }}
+                      />
+                      <button onClick={() => {
+                        const n = Number(restockQty);
+                        if (n > 0) { restockProduct(p.id, n); toast(t("Stoki imeongezwa", "Stock added")); }
+                        setRestockingId(null); setRestockQty("");
+                      }} style={{ background: "var(--dy-green)", color: "#fff", border: "none", borderRadius: 8, padding: "0 10px", cursor: "pointer", minHeight: 36 }}>
+                        <CheckCircle2 size={14} strokeWidth={2.5} />
+                      </button>
+                      <button onClick={() => { setRestockingId(null); setRestockQty(""); }} style={{ background: "#F0F4F8", border: "none", borderRadius: 8, padding: "0 8px", cursor: "pointer", minHeight: 36 }}>
+                        <X size={14} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => { setRestockingId(p.id); setRestockQty(""); }}
+                      style={{ background: "rgba(0,168,107,0.1)", color: "var(--dy-green)", border: "none", borderRadius: 8, padding: "6px 0", fontSize: 11, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 32 }}>
+                      <PackagePlus size={12} strokeWidth={2.5} /> {t("Ongeza Stoki", "Restock")}
+                    </button>
+                  )
+                )}
               </div>
               );
             })}
@@ -112,7 +147,7 @@ function Bidhaa() {
       </div>
 
       <ProductSheet
-        open={open} onClose={() => setOpen(false)} editing={editing}
+        open={open} onClose={() => setOpen(false)} editing={editing} isPro={isPro}
         onSave={(data) => {
           if (editing) { updateProduct(editing.id, data); toast(t("Mabadiliko yamehifadhiwa", "Changes saved")); }
           else { addProduct({ ...data, isAvailable: true }); toast(t("Bidhaa imeongezwa", "Product added")); }
@@ -127,10 +162,11 @@ function IconBtn({ children, onClick, title, color }: { children: React.ReactNod
   return <button onClick={onClick} title={title} style={{ background: "#F0F4F8", border: "none", borderRadius: 8, padding: "8px 0", fontSize: 14, color: color ?? "var(--dy-text)", cursor: "pointer", minHeight: 36, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{children}</button>;
 }
 
-function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClose: () => void; editing: Product | null; onSave: (data: { name: string; priceTzs: number; description?: string; photoUrl?: string; stockCount?: number }) => void }) {
+function ProductSheet({ open, onClose, editing, isPro, onSave }: { open: boolean; onClose: () => void; editing: Product | null; isPro: boolean; onSave: (data: { name: string; priceTzs: number; buyingPriceTzs?: number; description?: string; photoUrl?: string; stockCount?: number }) => void }) {
   const { t } = useI18n();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [buyPrice, setBuyPrice] = useState("");
   const [desc, setDesc] = useState("");
   const [photo, setPhoto] = useState("");
   const [stock, setStock] = useState("");
@@ -139,6 +175,7 @@ function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClo
   // Reset fields when opening
   useResetOnOpen(open, () => {
     setName(editing?.name ?? ""); setPrice(editing ? String(editing.priceTzs) : ""); setDesc(editing?.description ?? "");
+    setBuyPrice(editing?.buyingPriceTzs != null ? String(editing.buyingPriceTzs) : "");
     setPhoto(editing?.photoUrl ?? ""); setStock(editing?.stockCount != null ? String(editing.stockCount) : ""); setUploadErr("");
   });
 
@@ -159,6 +196,15 @@ function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClo
       <div style={{ display: "grid", gap: 12 }}>
         <div><label className="dy-label">{t("Jina la Bidhaa *", "Product Name *")}</label><input className="dy-input" value={name} onChange={e => setName(e.target.value)} placeholder={t("k.m. AB Classic Hoodie", "e.g. AB Classic Hoodie")} /></div>
         <div><label className="dy-label">{t("Bei (TZS) *", "Price (TZS) *")}</label><input className="dy-input" inputMode="numeric" value={price} onChange={e => setPrice(e.target.value.replace(/\D/g, ""))} placeholder="65000" /></div>
+        {isPro && (
+          <div>
+            <label className="dy-label">{t("Bei ya Ununuzi (Hiari)", "Buying Price (Optional)")}</label>
+            <input className="dy-input" inputMode="numeric" value={buyPrice} onChange={e => setBuyPrice(e.target.value.replace(/\D/g, ""))} placeholder="40000" />
+            <div style={{ fontSize: 11.5, color: "var(--dy-muted)", marginTop: 4 }}>
+              {t("Hii inatusaidia kuhesabu faida yako", "This helps us calculate your profit")}
+            </div>
+          </div>
+        )}
         <div><label className="dy-label">{t("Maelezo", "Description")}</label><textarea className="dy-input" rows={2} value={desc} onChange={e => setDesc(e.target.value)} /></div>
         <div>
           <label className="dy-label">{t("Picha ya Bidhaa", "Product Image")}</label>
@@ -183,7 +229,7 @@ function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClo
         <div><label className="dy-label">{t("Idadi Iliyopo", "Stock Count")}</label><input className="dy-input" inputMode="numeric" value={stock} onChange={e => setStock(e.target.value.replace(/\D/g, ""))} placeholder="10" /></div>
         <button className="dy-btn dy-btn-primary" onClick={() => {
           if (!name.trim() || !price) return;
-          onSave({ name: name.trim(), priceTzs: Number(price), description: desc || undefined, photoUrl: photo || undefined, stockCount: stock ? Number(stock) : undefined });
+          onSave({ name: name.trim(), priceTzs: Number(price), buyingPriceTzs: isPro && buyPrice ? Number(buyPrice) : undefined, description: desc || undefined, photoUrl: photo || undefined, stockCount: stock ? Number(stock) : undefined });
         }} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           {editing ? <><Save size={16} strokeWidth={2.5} /> {t("Hifadhi Mabadiliko", "Save Changes")}</> : <><CheckCircle2 size={16} strokeWidth={2.5} /> {t("Ongeza Bidhaa", "Add Product")}</>}
         </button>

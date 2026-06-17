@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatejaRouteImport } from './routes/wateja'
 import { Route as MsaidiziRouteImport } from './routes/msaidizi'
 import { Route as MauzoRouteImport } from './routes/mauzo'
+import { Route as MatumiziRouteImport } from './routes/matumizi'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BidhaaRouteImport } from './routes/bidhaa'
 import { Route as AkauntiRouteImport } from './routes/akaunti'
@@ -32,6 +33,11 @@ const MsaidiziRoute = MsaidiziRouteImport.update({
 const MauzoRoute = MauzoRouteImport.update({
   id: '/mauzo',
   path: '/mauzo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatumiziRoute = MatumiziRouteImport.update({
+  id: '/matumizi',
+  path: '/matumizi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/akaunti': typeof AkauntiRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
+  '/matumizi': typeof MatumiziRoute
   '/mauzo': typeof MauzoRoute
   '/msaidizi': typeof MsaidiziRoute
   '/wateja': typeof WatejaRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/akaunti': typeof AkauntiRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
+  '/matumizi': typeof MatumiziRoute
   '/mauzo': typeof MauzoRoute
   '/msaidizi': typeof MsaidiziRoute
   '/wateja': typeof WatejaRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/akaunti': typeof AkauntiRoute
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
+  '/matumizi': typeof MatumiziRoute
   '/mauzo': typeof MauzoRoute
   '/msaidizi': typeof MsaidiziRoute
   '/wateja': typeof WatejaRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/akaunti'
     | '/bidhaa'
     | '/login'
+    | '/matumizi'
     | '/mauzo'
     | '/msaidizi'
     | '/wateja'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/akaunti'
     | '/bidhaa'
     | '/login'
+    | '/matumizi'
     | '/mauzo'
     | '/msaidizi'
     | '/wateja'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/akaunti'
     | '/bidhaa'
     | '/login'
+    | '/matumizi'
     | '/mauzo'
     | '/msaidizi'
     | '/wateja'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   AkauntiRoute: typeof AkauntiRoute
   BidhaaRoute: typeof BidhaaRoute
   LoginRoute: typeof LoginRoute
+  MatumiziRoute: typeof MatumiziRoute
   MauzoRoute: typeof MauzoRoute
   MsaidiziRoute: typeof MsaidiziRoute
   WatejaRoute: typeof WatejaRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/mauzo'
       fullPath: '/mauzo'
       preLoaderRoute: typeof MauzoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matumizi': {
+      id: '/matumizi'
+      path: '/matumizi'
+      fullPath: '/matumizi'
+      preLoaderRoute: typeof MatumiziRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   AkauntiRoute: AkauntiRoute,
   BidhaaRoute: BidhaaRoute,
   LoginRoute: LoginRoute,
+  MatumiziRoute: MatumiziRoute,
   MauzoRoute: MauzoRoute,
   MsaidiziRoute: MsaidiziRoute,
   WatejaRoute: WatejaRoute,

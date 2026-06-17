@@ -5,7 +5,8 @@ import { AuthGuard } from "@/components/duka/Guard";
 import { useDuka } from "@/lib/duka/store";
 import { useToast } from "@/components/duka/Toast";
 import { useI18n } from "@/lib/duka/i18n";
-import { Save, LogOut, Crown, Sparkles, Check, X, UserPlus, Link2 } from "lucide-react";
+import { Save, LogOut, Crown, Sparkles, Check, X, UserPlus, Link2, Wallet, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { ProBadge } from "@/components/duka/ProBadge";
 import { useProGate } from "@/lib/duka/useProGate";
 import { ManageSubscriptionModal } from "@/components/duka/ManageSubscriptionModal";
@@ -190,6 +191,23 @@ function Akaunti() {
           <button className="dy-btn dy-btn-danger-ghost" onClick={() => { if (confirm(t("Toka nje ya akaunti?", "Sign out of your account?"))) { logout(); navigate({ to: "/login" }); } }} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             <LogOut size={16} strokeWidth={2.5} /> {t("Toka (Logout)", "Log Out")}
           </button>
+        </div>
+
+        <div className="dy-card" style={{ display: "grid", gap: 8 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 700, color: "var(--dy-muted)", textTransform: "uppercase", letterSpacing: ".06em" }}>{t("Zana Zaidi", "More Tools")}</div>
+          <Link to="/matumizi" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none", color: "inherit", padding: "8px 0" }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(231,76,60,0.12)", color: "var(--dy-red)", display: "grid", placeItems: "center" }}>
+              <Wallet size={18} strokeWidth={2.5} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                {t("Matumizi", "Expenses")}
+                {!isPro && <span style={{ fontSize: 10, fontWeight: 900, background: "#F5A623", color: "#fff", padding: "2px 6px", borderRadius: 999 }}>PRO</span>}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>{t("Fuatilia gharama zako", "Track your costs")}</div>
+            </div>
+            <ArrowRight size={16} strokeWidth={2.5} color="var(--dy-muted)" />
+          </Link>
         </div>
 
         <div style={{ textAlign: "center", padding: "10px 0 20px", color: "var(--dy-muted)", fontSize: 11.5, lineHeight: 1.6 }}>
