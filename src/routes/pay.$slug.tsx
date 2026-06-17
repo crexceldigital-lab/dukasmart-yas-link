@@ -5,6 +5,7 @@ import { formatTZS } from "@/lib/duka/utils";
 import { YasLogo, DukaSmartWordmark } from "@/components/duka/YasLogo";
 import { LangToggle, useI18n } from "@/lib/duka/i18n";
 import { Link2, CreditCard, Lock, Info, Clock, Check, X, RotateCcw } from "lucide-react";
+import { ProBadge } from "@/components/duka/ProBadge";
 
 export const Route = createFileRoute("/pay/$slug")({
   head: () => ({ meta: [{ title: "Lipa kwa Mixx by Yas — DUKA SMART" }, { name: "description", content: "Lipa salama kupitia Mixx by Yas." }] }),
@@ -13,15 +14,24 @@ export const Route = createFileRoute("/pay/$slug")({
 
 function PayPage() {
   const { slug } = Route.useParams();
-  const { merchant, getLink, startTransaction, confirmTransaction, failTransaction, getTransaction } = useDuka();
+  const { merchant, links, getLink, startTransaction, confirmTransaction, failTransaction, getTransaction } = useDuka();
   const { t } = useI18n();
-  const [link, setLink] = useState(getLink(slug));
+  // Resolve slug: direct link, then merchant customSlug / dukaId → newest active link.
+  const resolveLink = () => {
+    const direct = getLink(slug);
+    if (direct) return direct;
+    if (merchant && (merchant.customSlug === slug || merchant.dukaId.toLowerCase() === slug.toLowerCase())) {
+      return links[0];
+    }
+    return undefined;
+  };
+  const [link, setLink] = useState(resolveLink());
   const [phone, setPhone] = useState("");
   const [buyerName, setBuyerName] = useState("");
   const [stage, setStage] = useState<"form"|"pending"|"confirmed"|"failed">("form");
   const [txId, setTxId] = useState<string | null>(null);
 
-  useEffect(() => { setLink(getLink(slug)); }, [slug, getLink]);
+  useEffect(() => { setLink(resolveLink()); /* eslint-disable-next-line */ }, [slug, getLink, merchant, links]);
 
   // Demo: auto-confirm after 6 seconds, with 15% chance of failure
   useEffect(() => {
@@ -73,7 +83,10 @@ function PayPage() {
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff", color: "var(--dy-navy)", display: "grid", placeItems: "center", fontWeight: 900 }}>{(merchant?.businessName ?? "D")[0]}</div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 12, opacity: 0.8 }}>{t("Unalipa", "Paying")}</div>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>{merchant?.businessName ?? t("Duka", "Shop")}</div>
+                <div style={{ fontSize: 16, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  {merchant?.businessName ?? t("Duka", "Shop")}
+                  {merchant?.plan === "pro" && <ProBadge />}
+                </div>
               </div>
             </div>
             {link.productPhoto ? <img src={link.productPhoto} alt="" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 14, marginTop: 16 }} /> : null}

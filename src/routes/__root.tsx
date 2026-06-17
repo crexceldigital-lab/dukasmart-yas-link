@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DukaProvider } from "@/lib/duka/store";
 import { ToastProvider } from "@/components/duka/Toast";
+import { ProGateProvider } from "@/lib/duka/useProGate";
 
 function NotFoundComponent() {
   return (
@@ -126,7 +127,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <DukaProvider>
         <ToastProvider>
-          <Outlet />
+          <ProGateProvider>
+            <Outlet />
+          </ProGateProvider>
         </ToastProvider>
       </DukaProvider>
     </QueryClientProvider>

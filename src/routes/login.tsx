@@ -45,21 +45,39 @@ function LoginPage() {
   const verify = (code: string) => {
     // Demo: accept 123456 or any 6 digits
     if (code.length !== 6) return;
+    const np = normalizePhone(phone);
+    // Staff login: if this number is in the persisted owner's staffPhones, sign in as staff.
+    try {
+      const raw = typeof window !== "undefined" ? localStorage.getItem("dy_state_v1") : null;
+      if (raw) {
+        const p = JSON.parse(raw) as { merchant?: Merchant };
+        if (p.merchant?.staffPhones?.includes(np)) {
+          login(p.merchant, "staff");
+          toast(t("Karibu, mfanyakazi!", "Welcome, staff!"));
+          navigate({ to: "/" });
+          return;
+        }
+      }
+    } catch {}
     // Decide: phone ending in "1" => existing demo merchant, others => new
-    const existing = normalizePhone(phone).endsWith("1");
+    const existing = np.endsWith("1");
     if (existing) {
       const m: Merchant = {
         merchantId: "a0000000-0000-0000-0000-000000000001",
         dukaId: "DY-00001",
-        phone: normalizePhone(phone),
+        phone: np,
         businessName: "African Boy",
         category: "Fashion",
         city: "Dar es Salaam",
         bio: "The original East African streetwear brand. Quality drip, real culture.",
         creditScore: 78,
         createdAt: "2026-01-01T00:00:00Z",
+        plan: "free",
+        proRenewalDate: null,
+        customSlug: null,
+        staffPhones: [],
       };
-      login(m); toast(t("Karibu tena!", "Welcome back!")); navigate({ to: "/" });
+      login(m, "owner"); toast(t("Karibu tena!", "Welcome back!")); navigate({ to: "/" });
     } else {
       setIsNew(true); setStep(3);
     }
@@ -78,8 +96,12 @@ function LoginPage() {
       bio: biz.bio.slice(0, 120),
       creditScore: 15,
       createdAt: new Date().toISOString(),
+      plan: "free",
+      proRenewalDate: null,
+      customSlug: null,
+      staffPhones: [],
     };
-    login(m); toast(t("Duka lako limefunguliwa!", "Your shop is open!")); navigate({ to: "/" });
+    login(m, "owner"); toast(t("Duka lako limefunguliwa!", "Your shop is open!")); navigate({ to: "/" });
   };
 
   return (
