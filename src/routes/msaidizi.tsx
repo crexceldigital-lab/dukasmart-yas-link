@@ -68,8 +68,9 @@ function MsaidiziPage() {
   }, [merchant, products, transactions, stats, links, lang, tier]);
 
   useEffect(() => {
-    const el = scrollerRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
   }, [messages, busy]);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
