@@ -7,7 +7,7 @@ import { formatTZS, formatDate, getGreeting, getTier } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 import { PaymentLinkModal } from "@/components/duka/PaymentLinkModal";
 import { useI18n } from "@/lib/duka/i18n";
-import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Sparkles, Users } from "lucide-react";
+import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Sparkles, Users, TrendingUp, Wallet } from "lucide-react";
 import { useProGate } from "@/lib/duka/useProGate";
 import { ProLockOverlay } from "@/components/duka/ProLockOverlay";
 
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const { merchant, products, transactions, rewards, stats, customers } = useDuka();
+  const { merchant, products, transactions, rewards, stats, customers, finance } = useDuka();
   const { t, lang } = useI18n();
   const { isPro } = useProGate();
   const [open, setOpen] = useState(false);
@@ -115,6 +115,46 @@ function Dashboard() {
         )}
 
         {isPro ? customerCard : <ProLockOverlay message={t("Pandisha kuona wateja wako", "Upgrade to see your customers")}>{customerCard}</ProLockOverlay>}
+
+        {(() => {
+          const profitCard = (
+            <section className="dy-card" style={{ background: "linear-gradient(135deg, rgba(0,168,107,0.08), rgba(0,168,107,0.02))", border: "1px solid rgba(0,168,107,0.25)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--dy-green)", color: "#fff", display: "grid", placeItems: "center" }}>
+                  <TrendingUp size={18} strokeWidth={2.5} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--dy-muted)", textTransform: "uppercase", letterSpacing: ".06em" }}>{t("Faida ya Mwezi Huu", "This Month's Profit")}</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "var(--dy-green)", marginTop: 2 }}>{formatTZS(finance.monthProfit)}</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 11.5, color: "var(--dy-muted)", marginTop: 8 }}>
+                {t("Kutoka bidhaa zilizo na bei ya ununuzi", "From products with buying price set")}
+              </div>
+            </section>
+          );
+          return isPro ? profitCard : <ProLockOverlay message={t("Pandisha kuona faida yako", "Upgrade to see your profit")}>{profitCard}</ProLockOverlay>;
+        })()}
+
+        <Link
+          to="/matumizi"
+          className="dy-card"
+          style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 12 }}
+        >
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(231,76,60,0.12)", color: "var(--dy-red)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <Wallet size={20} strokeWidth={2.5} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 6 }}>
+              {t("Matumizi", "Expenses")}
+              {!isPro && <span style={{ fontSize: 10, fontWeight: 900, background: "#F5A623", color: "#fff", padding: "2px 6px", borderRadius: 999 }}>PRO</span>}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--dy-muted)", marginTop: 2 }}>
+              {t("Fuatilia gharama za biashara yako", "Track your business expenses")}
+            </div>
+          </div>
+          <ArrowRight size={18} strokeWidth={2.5} color="var(--dy-muted)" />
+        </Link>
 
         {rewards.length > 0 && (
           <section className="dy-card">
