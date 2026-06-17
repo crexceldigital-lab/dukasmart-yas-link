@@ -7,7 +7,7 @@ import { formatTZS, categoryIcon } from "@/lib/duka/utils";
 import { Modal } from "@/components/duka/Modal";
 import { useToast } from "@/components/duka/Toast";
 import { useI18n } from "@/lib/duka/i18n";
-import { Package, Plus, Pencil, ToggleLeft, Trash2, Save, CheckCircle2 } from "lucide-react";
+import { Package, Plus, Pencil, ToggleLeft, Trash2, Save, CheckCircle2, Upload, X, ImageIcon } from "lucide-react";
 
 export const Route = createFileRoute("/bidhaa")({
   head: () => ({ meta: [{ title: "Bidhaa — DUKA SMART" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
@@ -90,12 +90,25 @@ function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClo
   const [desc, setDesc] = useState("");
   const [photo, setPhoto] = useState("");
   const [stock, setStock] = useState("");
+  const [uploadErr, setUploadErr] = useState("");
 
   // Reset fields when opening
   useResetOnOpen(open, () => {
     setName(editing?.name ?? ""); setPrice(editing ? String(editing.priceTzs) : ""); setDesc(editing?.description ?? "");
-    setPhoto(editing?.photoUrl ?? ""); setStock(editing?.stockCount != null ? String(editing.stockCount) : "");
+    setPhoto(editing?.photoUrl ?? ""); setStock(editing?.stockCount != null ? String(editing.stockCount) : ""); setUploadErr("");
   });
+
+  const handleFile = async (file: File) => {
+    setUploadErr("");
+    if (!file.type.startsWith("image/")) { setUploadErr(t("Chagua faili la picha tu", "Please select an image file")); return; }
+    if (file.size > 5 * 1024 * 1024) { setUploadErr(t("Picha kubwa sana (kiwango cha juu 5MB)", "Image too large (max 5MB)")); return; }
+    try {
+      const dataUrl = await compressImage(file, 800, 0.8);
+      setPhoto(dataUrl);
+    } catch {
+      setUploadErr(t("Imeshindwa kupakia picha", "Failed to load image"));
+    }
+  };
 
   return (
     <Modal open={open} onClose={onClose} title={editing ? t("Hariri Bidhaa", "Edit Product") : t("Ongeza Bidhaa Mpya", "Add New Product")}>
@@ -103,7 +116,26 @@ function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClo
         <div><label className="dy-label">{t("Jina la Bidhaa *", "Product Name *")}</label><input className="dy-input" value={name} onChange={e => setName(e.target.value)} placeholder={t("k.m. AB Classic Hoodie", "e.g. AB Classic Hoodie")} /></div>
         <div><label className="dy-label">{t("Bei (TZS) *", "Price (TZS) *")}</label><input className="dy-input" inputMode="numeric" value={price} onChange={e => setPrice(e.target.value.replace(/\D/g, ""))} placeholder="65000" /></div>
         <div><label className="dy-label">{t("Maelezo", "Description")}</label><textarea className="dy-input" rows={2} value={desc} onChange={e => setDesc(e.target.value)} /></div>
-        <div><label className="dy-label">{t("URL ya Picha", "Image URL")}</label><input className="dy-input" value={photo} onChange={e => setPhoto(e.target.value)} placeholder="https://..." /></div>
+        <div>
+          <label className="dy-label">{t("Picha ya Bidhaa", "Product Image")}</label>
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <div style={{ width: 80, height: 80, borderRadius: 10, background: "#F0F4F8", display: "grid", placeItems: "center", overflow: "hidden", flexShrink: 0, border: "1px solid #E5EAF0" }}>
+              {photo ? <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ImageIcon size={28} strokeWidth={1.5} color="var(--dy-muted)" />}
+            </div>
+            <div style={{ flex: 1, display: "grid", gap: 6 }}>
+              <label className="dy-btn" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#F0F4F8", color: "var(--dy-navy)", cursor: "pointer", margin: 0, padding: "10px 12px" }}>
+                <Upload size={16} strokeWidth={2.5} /> {photo ? t("Badilisha Picha", "Change Image") : t("Pakia Picha", "Upload Image")}
+                <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
+              </label>
+              {photo && (
+                <button type="button" onClick={() => setPhoto("")} style={{ background: "transparent", border: "none", color: "#E74C3C", fontSize: 12, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, padding: 0 }}>
+                  <X size={12} strokeWidth={2.5} /> {t("Ondoa picha", "Remove image")}
+                </button>
+              )}
+              {uploadErr && <div style={{ fontSize: 12, color: "#E74C3C" }}>{uploadErr}</div>}
+            </div>
+          </div>
+        </div>
         <div><label className="dy-label">{t("Idadi Iliyopo", "Stock Count")}</label><input className="dy-input" inputMode="numeric" value={stock} onChange={e => setStock(e.target.value.replace(/\D/g, ""))} placeholder="10" /></div>
         <button className="dy-btn dy-btn-primary" onClick={() => {
           if (!name.trim() || !price) return;
@@ -118,4 +150,30 @@ function ProductSheet({ open, onClose, editing, onSave }: { open: boolean; onClo
 
 function useResetOnOpen(open: boolean, fn: () => void) {
   useEffect(() => { if (open) fn(); /* eslint-disable-next-line */ }, [open]);
+}
+
+async function compressImage(file: File, maxDim: number, quality: number): Promise<string> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error("image load"));
+    i.src = dataUrl;
+  });
+  let { width, height } = img;
+  if (width > maxDim || height > maxDim) {
+    const ratio = Math.min(maxDim / width, maxDim / height);
+    width = Math.round(width * ratio); height = Math.round(height * ratio);
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = width; canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  ctx.drawImage(img, 0, 0, width, height);
+  return canvas.toDataURL("image/jpeg", quality);
 }
