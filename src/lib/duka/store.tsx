@@ -12,6 +12,10 @@ export type Merchant = {
   profilePhoto?: string;
   creditScore: number;
   createdAt: string;
+  plan?: "free" | "pro";
+  proRenewalDate?: string | null;
+  customSlug?: string | null;
+  staffPhones?: string[];
 };
 
 export type Product = {
@@ -52,6 +56,16 @@ export type PaymentLink = {
 
 export type Reward = { id: string; label: string; value: string; createdAt: string };
 
+export type SessionRole = "owner" | "staff";
+
+export type Customer = {
+  phone: string;
+  name?: string;
+  totalSpent: number;
+  purchaseCount: number;
+  lastPurchase: string;
+};
+
 const DEMO_MERCHANT: Merchant = {
   merchantId: "a0000000-0000-0000-0000-000000000001",
   dukaId: "DY-00001",
@@ -62,6 +76,10 @@ const DEMO_MERCHANT: Merchant = {
   bio: "The original East African streetwear brand. Quality drip, real culture.",
   creditScore: 78,
   createdAt: "2026-01-01T00:00:00Z",
+  plan: "free",
+  proRenewalDate: null,
+  customSlug: null,
+  staffPhones: [],
 };
 
 const DEMO_PRODUCTS: Product[] = [
@@ -101,19 +119,26 @@ const DEMO_REWARDS: Reward[] = [
 type Ctx = {
   merchant: Merchant | null;
   loading: boolean;
+  sessionRole: SessionRole;
   products: Product[];
   transactions: Transaction[];
   rewards: Reward[];
   links: PaymentLink[];
+  customers: Customer[];
   stats: { today: { total: number; count: number }, week: { total: number; count: number }, month: { total: number; count: number }, allTime: { total: number; count: number } };
-  login: (merchant: Merchant) => void;
+  login: (merchant: Merchant, role?: SessionRole) => void;
   logout: () => void;
   updateProfile: (patch: Partial<Merchant>) => void;
+  upgradeToPro: () => void;
+  cancelPro: () => void;
+  setCustomSlug: (slug: string | null) => void;
+  addStaffPhone: (phone: string) => boolean;
+  removeStaffPhone: (phone: string) => void;
   addProduct: (p: Omit<Product,"id"|"isAvailable"> & { isAvailable?: boolean }) => Product;
   updateProduct: (id: string, patch: Partial<Product>) => void;
   toggleProduct: (id: string) => void;
   deleteProduct: (id: string) => void;
-  createLink: (opts: { productId?: string; customAmountTzs?: number; customLabel?: string }) => PaymentLink;
+  createLink: (opts: { productId?: string; customAmountTzs?: number; customLabel?: string; buyerName?: string; buyerPhone?: string }) => PaymentLink;
   getLink: (slug: string) => PaymentLink | undefined;
   startTransaction: (slug: string, buyerPhone: string, buyerName?: string) => Transaction;
   confirmTransaction: (id: string) => Transaction | undefined;
@@ -124,6 +149,7 @@ type Ctx = {
 const StoreCtx = createContext<Ctx | null>(null);
 const KEY = "dy_state_v1";
 const TOKEN_KEY = "dy_token";
+const ROLE_KEY = "dy_role";
 
 type Persist = {
   merchant: Merchant | null;
@@ -148,6 +174,7 @@ function savePersist(p: Persist) {
 
 export function DukaProvider({ children }: { children: ReactNode }) {
   const [merchant, setMerchant] = useState<Merchant | null>(null);
+  const [sessionRole, setSessionRole] = useState<SessionRole>("owner");
   const [products, setProducts] = useState<Product[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -156,9 +183,11 @@ export function DukaProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
+    const role = typeof window !== "undefined" ? localStorage.getItem(ROLE_KEY) : null;
     const p = loadPersist();
     if (token && p?.merchant) {
-      setMerchant(p.merchant);
+      setMerchant({ plan: "free", proRenewalDate: null, customSlug: null, staffPhones: [], ...p.merchant });
+      setSessionRole(role === "staff" ? "staff" : "owner");
       setProducts(p.products);
       setTransactions(p.transactions);
       setRewards(p.rewards);
@@ -194,10 +223,34 @@ export function DukaProvider({ children }: { children: ReactNode }) {
     };
   }, [transactions]);
 
+  const customers = useMemo<Customer[]>(() => {
+    const map = new Map<string, Customer>();
+    for (const t of transactions) {
+      if (t.status !== "confirmed" || !t.buyerPhone) continue;
+      const cur = map.get(t.buyerPhone);
+      if (cur) {
+        cur.totalSpent += t.amount;
+        cur.purchaseCount += 1;
+        if (new Date(t.createdAt) > new Date(cur.lastPurchase)) cur.lastPurchase = t.createdAt;
+        if (t.buyerName && !cur.name) cur.name = t.buyerName;
+      } else {
+        map.set(t.buyerPhone, {
+          phone: t.buyerPhone,
+          name: t.buyerName,
+          totalSpent: t.amount,
+          purchaseCount: 1,
+          lastPurchase: t.createdAt,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.totalSpent - a.totalSpent);
+  }, [transactions]);
+
   const value: Ctx = {
-    merchant, loading, products, transactions, rewards, links, stats,
-    login(m) {
+    merchant, loading, sessionRole, products, transactions, rewards, links, customers, stats,
+    login(m, role = "owner") {
       setMerchant(m);
+      setSessionRole(role);
       // Seed demo data if first time
       const existing = loadPersist();
       if (!existing || existing.merchant?.merchantId !== m.merchantId) {
@@ -206,16 +259,44 @@ export function DukaProvider({ children }: { children: ReactNode }) {
         setRewards(DEMO_REWARDS);
         setLinks([]);
       }
-      if (typeof window !== "undefined") localStorage.setItem(TOKEN_KEY, "demo-token-" + m.merchantId);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(TOKEN_KEY, "demo-token-" + m.merchantId);
+        localStorage.setItem(ROLE_KEY, role);
+      }
     },
     logout() {
-      setMerchant(null); setProducts([]); setTransactions([]); setRewards([]); setLinks([]);
+      setMerchant(null); setSessionRole("owner"); setProducts([]); setTransactions([]); setRewards([]); setLinks([]);
       if (typeof window !== "undefined") {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(KEY);
+        localStorage.removeItem(ROLE_KEY);
       }
     },
     updateProfile(patch) { setMerchant(m => m ? { ...m, ...patch } : m); },
+    upgradeToPro() {
+      const renewal = new Date(Date.now() + 30 * 86400 * 1000).toISOString();
+      setMerchant(m => m ? { ...m, plan: "pro", proRenewalDate: renewal } : m);
+    },
+    cancelPro() {
+      setMerchant(m => m ? { ...m, plan: "free", proRenewalDate: null } : m);
+    },
+    setCustomSlug(slug) {
+      setMerchant(m => m ? { ...m, customSlug: slug } : m);
+    },
+    addStaffPhone(phone) {
+      let ok = false;
+      setMerchant(m => {
+        if (!m) return m;
+        const list = m.staffPhones ?? [];
+        if (list.length >= 2 || list.includes(phone)) return m;
+        ok = true;
+        return { ...m, staffPhones: [...list, phone] };
+      });
+      return ok;
+    },
+    removeStaffPhone(phone) {
+      setMerchant(m => m ? { ...m, staffPhones: (m.staffPhones ?? []).filter(p => p !== phone) } : m);
+    },
     addProduct(p) {
       const np: Product = { id: "p" + Math.random().toString(36).slice(2,8), isAvailable: true, ...p };
       setProducts(list => [np, ...list]);
