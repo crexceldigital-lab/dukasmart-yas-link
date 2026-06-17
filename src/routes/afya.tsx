@@ -35,8 +35,8 @@ function Afya() {
               <div key={t.swahili} style={{
                 display: "flex", alignItems: "center", gap: 12, padding: 14,
                 borderTop: i === 0 ? "none" : "1px solid var(--dy-border)",
-                background: active ? "#F0F6FF" : "transparent",
-                border: active ? "1.5px solid #1A3E6F" : undefined,
+                background: active ? "rgba(18,50,116,0.06)" : "transparent",
+                border: active ? "1.5px solid var(--dy-navy)" : undefined,
                 borderRadius: active ? 12 : 0, margin: active ? 6 : 0,
               }}>
                 <div style={{ width: 14, height: 14, borderRadius: "50%", background: t.color, flexShrink: 0 }} />
@@ -50,7 +50,7 @@ function Afya() {
           })}
         </div>
 
-        <div style={{ background: "#F0F6FF", border: "1px solid #BCDBFF", color: "#1A3E6F", padding: 14, borderRadius: 12, fontSize: 13 }}>
+        <div style={{ background: "rgba(18,50,116,0.06)", border: "1px solid rgba(18,50,116,0.18)", color: "var(--dy-navy)", padding: 14, borderRadius: 12, fontSize: 13 }}>
           💡 <b>Vidokezo:</b> Kuza Afya yako kwa kuuza mara kwa mara, kuwa na bidhaa nyingi zinazopatikana, na kupokea malipo kwa Mixx by Yas.
         </div>
       </div>

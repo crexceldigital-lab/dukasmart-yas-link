@@ -27,7 +27,7 @@ function Bidhaa() {
         title="Bidhaa Zangu"
         subtitle={`${products.length} / 20 bidhaa`}
         right={
-          <button onClick={startAdd} aria-label="Ongeza bidhaa" style={{ width: 38, height: 38, borderRadius: 12, background: "#00A86B", color: "#fff", border: "none", fontSize: 20, fontWeight: 800, cursor: "pointer" }}>+</button>
+          <button onClick={startAdd} aria-label="Ongeza bidhaa" style={{ width: 38, height: 38, borderRadius: 12, background: "var(--dy-yellow)", color: "var(--dy-navy)", border: "none", fontSize: 20, fontWeight: 800, cursor: "pointer" }}>+</button>
         }
       />
       <div style={{ padding: 16 }}>

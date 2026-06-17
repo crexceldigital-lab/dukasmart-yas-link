@@ -38,8 +38,19 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
   };
   const whatsapp = () => {
     if (!url || !link) return;
-    const text = encodeURIComponent(`Habari! Tafadhali lipa ${formatTZS(link.amount)} kwa ${link.label} kupitia Mixx by Yas:\n${url}\n— ${merchant?.businessName ?? "DUKA SMART"}`);
-    window.open("https://wa.me/?text=" + text, "_blank");
+    const lines = [
+      `*DUKA SMART* — Ombi la Malipo`,
+      ``,
+      `Habari! 👋 Tafadhali kamilisha malipo yako:`,
+      ``,
+      `🛒 Bidhaa: ${link.label}`,
+      `💰 Kiasi: ${formatTZS(link.amount)}`,
+      `🔗 Kiungo cha Malipo: ${url}`,
+      ``,
+      `Lipa salama kupitia *Mixx by Yas*.`,
+      `— ${merchant?.businessName ?? "DUKA SMART"}`,
+    ].join("\n");
+    window.open("https://wa.me/?text=" + encodeURIComponent(lines), "_blank");
   };
 
   return (

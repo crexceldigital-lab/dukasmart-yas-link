@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useDuka } from "@/lib/duka/store";
 import { formatTZS, categoryEmoji } from "@/lib/duka/utils";
+import { YasLogo, DukaSmartWordmark } from "@/components/duka/YasLogo";
 
 export const Route = createFileRoute("/pay/$slug")({
   head: () => ({ meta: [{ title: "Lipa kwa Mixx by Yas — DUKA SMART" }, { name: "description", content: "Lipa salama kupitia Mixx by Yas." }] }),
@@ -52,9 +53,16 @@ function PayPage() {
 
   return (
     <div style={{ maxWidth: 430, margin: "0 auto", minHeight: "100vh", background: "var(--dy-bg)" }}>
+      <header style={{ background: "var(--dy-navy)", color: "#fff", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <YasLogo size={26} />
+          <DukaSmartWordmark size={15} />
+        </span>
+        <span style={{ fontSize: 11, opacity: 0.8, fontWeight: 600 }}>Lipa kwa Mixx by Yas</span>
+      </header>
       {stage === "form" && (
         <>
-          <div style={{ background: "linear-gradient(135deg,#1A3E6F,#2A5FAF)", color: "#fff", padding: "26px 20px" }}>
+          <div style={{ background: "linear-gradient(135deg, var(--dy-navy) 0%, var(--dy-navy-2) 100%)", color: "#fff", padding: "26px 20px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff", color: "var(--dy-navy)", display: "grid", placeItems: "center", fontWeight: 900 }}>{(merchant?.businessName ?? "D")[0]}</div>
               <div style={{ minWidth: 0 }}>
@@ -78,7 +86,7 @@ function PayPage() {
             <div><label className="dy-label">Jina lako (hiari)</label><input className="dy-input" value={buyerName} onChange={e => setBuyerName(e.target.value)} placeholder="k.m. Asha" /></div>
             <button className="dy-btn dy-btn-primary" onClick={submit}>💳 Lipa {formatTZS(link.amount)}</button>
             <div style={{ textAlign: "center", fontSize: 12, color: "var(--dy-muted)" }}>🔒 Malipo salama kupitia Mixx by Yas</div>
-            <div style={{ background: "#F0F6FF", border: "1px solid #BCDBFF", padding: 12, borderRadius: 10, fontSize: 12.5, color: "#1A3E6F", lineHeight: 1.5 }}>
+            <div style={{ background: "rgba(18,50,116,0.06)", border: "1px solid rgba(18,50,116,0.18)", padding: 12, borderRadius: 10, fontSize: 12.5, color: "var(--dy-navy)", lineHeight: 1.5 }}>
               ℹ️ Baada ya kubofya "Lipa", utapokea ujumbe wa USSD kwenye simu yako. Ingiza PIN yako ya Mixx ili kukamilisha malipo.
             </div>
           </div>
@@ -119,6 +127,13 @@ function PayPage() {
           <button className="dy-btn dy-btn-primary" style={{ width: "auto", padding: "12px 22px" }} onClick={() => { setStage("form"); setTxId(null); }}>🔁 Jaribu Tena</button>
         </div>
       )}
+      <footer style={{ borderTop: "1px solid var(--dy-border)", marginTop: 24, padding: "16px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: "var(--dy-muted)", fontSize: 11.5 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <YasLogo size={22} />
+          <DukaSmartWordmark size={13} color="var(--dy-navy)" accent="var(--dy-navy-2)" />
+        </span>
+        <span>Powered by DUKA SMART × Mixx by Yas</span>
+      </footer>
     </div>
   );
 }
