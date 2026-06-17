@@ -6,6 +6,7 @@ import { useDuka } from "@/lib/duka/store";
 import { formatTZS, formatDate, getGreeting, getTier } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 import { PaymentLinkModal } from "@/components/duka/PaymentLinkModal";
+import { useI18n } from "@/lib/duka/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const { merchant, products, transactions, rewards, stats } = useDuka();
+  const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
   if (!merchant) return null;
   const tier = getTier(merchant.creditScore);
@@ -33,38 +35,38 @@ function Dashboard() {
       <Topbar
         title={merchant.businessName}
         subtitle={`${merchant.dukaId} • ${merchant.city}`}
-        right={<span className="dy-pill" style={{ background: "rgba(0,168,107,0.2)", color: "#fff", border: `1px solid ${tier.color}` }}>{tier.swahili}</span>}
+        right={<span className="dy-pill" style={{ background: "rgba(0,168,107,0.2)", color: "#fff", border: `1px solid ${tier.color}` }}>{lang === "en" ? tier.english : tier.swahili}</span>}
       />
       <div style={{ padding: 16, display: "grid", gap: 14 }}>
         <div className="dy-hero">
           <div style={{ fontSize: 13, opacity: 0.85 }}>{getGreeting()}, {merchant.businessName.split(" ")[0]} 👋</div>
-          <div style={{ fontSize: 13, opacity: 0.7, marginTop: 6 }}>Mauzo ya leo</div>
+          <div style={{ fontSize: 13, opacity: 0.7, marginTop: 6 }}>{t("Mauzo ya leo", "Today's sales")}</div>
           <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.02em", marginTop: 2 }}>{formatTZS(stats.today.total)}</div>
-          <div style={{ fontSize: 12.5, opacity: 0.8 }}>{stats.today.count} miamala leo</div>
-          <button className="dy-btn dy-btn-primary" style={{ marginTop: 14 }} onClick={() => setOpen(true)}>⚡ Unda Kiungo cha Malipo</button>
+          <div style={{ fontSize: 12.5, opacity: 0.8 }}>{stats.today.count} {t("miamala leo", "transactions today")}</div>
+          <button className="dy-btn dy-btn-primary" style={{ marginTop: 14 }} onClick={() => setOpen(true)}>{t("⚡ Unda Kiungo cha Malipo", "⚡ Create Payment Link")}</button>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <StatCard label="Wiki Hii" value={formatTZS(stats.week.total)} sub={`${stats.week.count} miamala`} accent="var(--dy-green)" />
-          <StatCard label="Mwezi Huu" value={formatTZS(stats.month.total)} sub={`${stats.month.count} miamala`} />
-          <StatCard label="Jumla Yote" value={formatTZS(stats.allTime.total)} sub={`${stats.allTime.count} miamala`} />
+          <StatCard label={t("Wiki Hii", "This Week")} value={formatTZS(stats.week.total)} sub={`${stats.week.count} ${t("miamala", "txns")}`} accent="var(--dy-green)" />
+          <StatCard label={t("Mwezi Huu", "This Month")} value={formatTZS(stats.month.total)} sub={`${stats.month.count} ${t("miamala", "txns")}`} />
+          <StatCard label={t("Jumla Yote", "All Time")} value={formatTZS(stats.allTime.total)} sub={`${stats.allTime.count} ${t("miamala", "txns")}`} />
           <div className="dy-card" style={{ background: "linear-gradient(135deg, #123274, #1B49A6)", color: "#fff", border: "none" }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, opacity: 0.8, textTransform: "uppercase", letterSpacing: ".06em" }}>Afya ya Biashara</div>
+            <div style={{ fontSize: 11.5, fontWeight: 600, opacity: 0.8, textTransform: "uppercase", letterSpacing: ".06em" }}>{t("Afya ya Biashara", "Business Health")}</div>
             <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>{merchant.creditScore}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD100", marginTop: 2 }}>{tier.swahili}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD100", marginTop: 2 }}>{lang === "en" ? tier.english : tier.swahili}</div>
           </div>
         </div>
 
         {top.length > 0 && (
           <section className="dy-card">
-            <h3 style={sectionTitle}>⭐ Bidhaa Zinazouza</h3>
+            <h3 style={sectionTitle}>{t("⭐ Bidhaa Zinazouza", "⭐ Top Products")}</h3>
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {top.map((p, i) => (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ fontSize: 22 }}>{medals[i]}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 700 }}>{p.name}</div>
-                    <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>{p.unitsSold ?? 0} zimeuzwa</div>
+                    <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>{p.unitsSold ?? 0} {t("zimeuzwa", "sold")}</div>
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: "var(--dy-green)" }}>{formatTZS(p.revenue)}</div>
                 </div>
@@ -75,7 +77,7 @@ function Dashboard() {
 
         {rewards.length > 0 && (
           <section className="dy-card">
-            <h3 style={sectionTitle}>🎁 Zawadi za YAS</h3>
+            <h3 style={sectionTitle}>{t("🎁 Zawadi za YAS", "🎁 YAS Rewards")}</h3>
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {rewards.map(r => (
                 <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -92,15 +94,15 @@ function Dashboard() {
 
         <section className="dy-card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h3 style={sectionTitle}>Miamala ya Hivi Karibuni</h3>
-            <Link to="/mauzo" style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-navy)" }}>Yote →</Link>
+            <h3 style={sectionTitle}>{t("Miamala ya Hivi Karibuni", "Recent Transactions")}</h3>
+            <Link to="/mauzo" style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-navy)" }}>{t("Yote →", "All →")}</Link>
           </div>
           {recent.length === 0 ? (
             <div style={{ padding: "30px 10px", textAlign: "center" }}>
               <div style={{ fontSize: 40 }}>🧾</div>
-              <div style={{ fontSize: 15, fontWeight: 700, marginTop: 8 }}>Bado Hakuna Miamala</div>
-              <p style={{ fontSize: 13, color: "var(--dy-muted)", marginTop: 4 }}>Unda kiungo cha kwanza ili kuanza kuuza</p>
-              <button className="dy-btn dy-btn-primary" style={{ marginTop: 12, width: "auto", padding: "10px 18px" }} onClick={() => setOpen(true)}>⚡ Unda Kiungo</button>
+              <div style={{ fontSize: 15, fontWeight: 700, marginTop: 8 }}>{t("Bado Hakuna Miamala", "No Transactions Yet")}</div>
+              <p style={{ fontSize: 13, color: "var(--dy-muted)", marginTop: 4 }}>{t("Unda kiungo cha kwanza ili kuanza kuuza", "Create your first link to start selling")}</p>
+              <button className="dy-btn dy-btn-primary" style={{ marginTop: 12, width: "auto", padding: "10px 18px" }} onClick={() => setOpen(true)}>{t("⚡ Unda Kiungo", "⚡ Create Link")}</button>
             </div>
           ) : (
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
