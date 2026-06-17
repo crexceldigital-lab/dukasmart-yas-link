@@ -29,6 +29,7 @@ export function BottomNav() {
     { to: "/bidhaa",  label: t("Bidhaa",   "Products"), icon: <BoxIcon /> },
     { to: "/mauzo",   label: t("Mauzo",    "Sales"),    icon: <TrendIcon /> },
     { to: "/afya",    label: t("Afya",     "Health"),   icon: <StarIcon /> },
+    { to: "/msaidizi",label: t("Msaidizi", "Assistant"),icon: <SparkleChatIcon /> },
     { to: "/akaunti", label: t("Akaunti",  "Account"),  icon: <UserIcon /> },
   ];
   return (
@@ -59,3 +60,4 @@ function BoxIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="curren
 function TrendIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>); }
 function StarIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg>); }
 function UserIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>); }
+function SparkleChatIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M14 8.5l.7 1.6 1.8.3-1.3 1.2.3 1.8-1.5-.8-1.5.8.3-1.8L11.5 10.4l1.8-.3z"/></svg>); }

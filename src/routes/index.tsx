@@ -7,7 +7,7 @@ import { formatTZS, formatDate, getGreeting, getTier } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 import { PaymentLinkModal } from "@/components/duka/PaymentLinkModal";
 import { useI18n } from "@/lib/duka/i18n";
-import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Trophy } from "lucide-react";
+import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Trophy, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -132,6 +132,28 @@ function Dashboard() {
       </div>
 
       <PaymentLinkModal open={open} onClose={() => setOpen(false)} />
+
+      <Link
+        to="/msaidizi"
+        aria-label={t("Msaidizi", "Assistant")}
+        style={{
+          position: "fixed",
+          right: 16,
+          bottom: 80,
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #123274, #00A86B)",
+          color: "#fff",
+          display: "grid",
+          placeItems: "center",
+          boxShadow: "0 8px 20px rgba(18,50,116,0.35)",
+          zIndex: 40,
+          textDecoration: "none",
+        }}
+      >
+        <Sparkles size={24} strokeWidth={2.5} />
+      </Link>
     </>
   );
 }

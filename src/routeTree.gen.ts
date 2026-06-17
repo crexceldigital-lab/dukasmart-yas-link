@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MsaidiziRouteImport } from './routes/msaidizi'
 import { Route as MauzoRouteImport } from './routes/mauzo'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BidhaaRouteImport } from './routes/bidhaa'
@@ -17,6 +18,11 @@ import { Route as AfyaRouteImport } from './routes/afya'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PaySlugRouteImport } from './routes/pay.$slug'
 
+const MsaidiziRoute = MsaidiziRouteImport.update({
+  id: '/msaidizi',
+  path: '/msaidizi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MauzoRoute = MauzoRouteImport.update({
   id: '/mauzo',
   path: '/mauzo',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
+  '/msaidizi': typeof MsaidiziRoute
   '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
+  '/msaidizi': typeof MsaidiziRoute
   '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/bidhaa': typeof BidhaaRoute
   '/login': typeof LoginRoute
   '/mauzo': typeof MauzoRoute
+  '/msaidizi': typeof MsaidiziRoute
   '/pay/$slug': typeof PaySlugRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/bidhaa'
     | '/login'
     | '/mauzo'
+    | '/msaidizi'
     | '/pay/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/bidhaa'
     | '/login'
     | '/mauzo'
+    | '/msaidizi'
     | '/pay/$slug'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/bidhaa'
     | '/login'
     | '/mauzo'
+    | '/msaidizi'
     | '/pay/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -118,11 +130,19 @@ export interface RootRouteChildren {
   BidhaaRoute: typeof BidhaaRoute
   LoginRoute: typeof LoginRoute
   MauzoRoute: typeof MauzoRoute
+  MsaidiziRoute: typeof MsaidiziRoute
   PaySlugRoute: typeof PaySlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/msaidizi': {
+      id: '/msaidizi'
+      path: '/msaidizi'
+      fullPath: '/msaidizi'
+      preLoaderRoute: typeof MsaidiziRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mauzo': {
       id: '/mauzo'
       path: '/mauzo'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   BidhaaRoute: BidhaaRoute,
   LoginRoute: LoginRoute,
   MauzoRoute: MauzoRoute,
+  MsaidiziRoute: MsaidiziRoute,
   PaySlugRoute: PaySlugRoute,
 }
 export const routeTree = rootRouteImport
