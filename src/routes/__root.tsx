@@ -13,7 +13,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DukaProvider } from "@/lib/duka/store";
 import { ToastProvider } from "@/components/duka/Toast";
-import { I18nProvider } from "@/lib/duka/i18n";
 
 function NotFoundComponent() {
   return (
@@ -83,11 +82,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "DUKA SMART — POS kwa Mixx by Yas" },
       { name: "description", content: "Mfumo wa mauzo kwa wajasiriamali wa Kitanzania. Powered by YAS Business & Mixx by Yas." },
       { name: "theme-color", content: "#123274" },
-      { property: "og:title", content: "DUKA SMART" },
-      { property: "og:description", content: "POS mini-app kwa vijana wa Tanzania. Lipa kwa Mixx by Yas." },
+      { property: "og:title", content: "DUKA SMART — POS kwa Mixx by Yas" },
+      { property: "og:description", content: "Mfumo wa mauzo kwa wajasiriamali wa Kitanzania. Powered by YAS Business & Mixx by Yas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "DUKA SMART — POS kwa Mixx by Yas" },
+      { name: "twitter:description", content: "Mfumo wa mauzo kwa wajasiriamali wa Kitanzania. Powered by YAS Business & Mixx by Yas." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ccbca48f-e63b-4729-b041-7acf5aa31700/id-preview-877d19d7--58b71a27-f060-495a-9f57-c2cd8803ab3f.lovable.app-1781681835388.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ccbca48f-e63b-4729-b041-7acf5aa31700/id-preview-877d19d7--58b71a27-f060-495a-9f57-c2cd8803ab3f.lovable.app-1781681835388.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -121,13 +124,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <DukaProvider>
-          <ToastProvider>
-            <Outlet />
-          </ToastProvider>
-        </DukaProvider>
-      </I18nProvider>
+      <DukaProvider>
+        <ToastProvider>
+          <Outlet />
+        </ToastProvider>
+      </DukaProvider>
     </QueryClientProvider>
   );
 }
