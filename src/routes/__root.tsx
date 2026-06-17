@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DukaProvider } from "@/lib/duka/store";
 import { ToastProvider } from "@/components/duka/Toast";
 import { ProGateProvider } from "@/lib/duka/useProGate";
+import { I18nProvider } from "@/lib/duka/i18n";
 
 function NotFoundComponent() {
   return (
@@ -125,13 +126,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DukaProvider>
-        <ToastProvider>
-          <ProGateProvider>
-            <Outlet />
-          </ProGateProvider>
-        </ToastProvider>
-      </DukaProvider>
+      <I18nProvider>
+        <DukaProvider>
+          <ToastProvider>
+            <ProGateProvider>
+              <Outlet />
+            </ProGateProvider>
+          </ToastProvider>
+        </DukaProvider>
+      </I18nProvider>
     </QueryClientProvider>
   );
 }
