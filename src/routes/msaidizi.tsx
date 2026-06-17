@@ -141,8 +141,8 @@ function MsaidiziPage() {
   return (
     <>
       <Topbar title={t("Msaidizi", "Assistant")} subtitle={t("AI wako wa biashara", "Your business AI")} />
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, background: "#F0F4F8" }}>
-        <div ref={scrollerRef} style={{ flex: 1, overflowY: "auto", padding: "14px 14px 8px", paddingBottom: 8 }}>
+      <div style={{ background: "#F0F4F8", minHeight: "calc(100vh - 64px)" }}>
+        <div ref={scrollerRef} style={{ padding: "14px 14px 90px" }}>
           {/* Greeting */}
           <AssistantBubble>{greeting}</AssistantBubble>
 
@@ -188,7 +188,7 @@ function MsaidiziPage() {
           )}
         </div>
 
-        <Composer
+        <ComposerFixed
           input={input} setInput={setInput} busy={busy}
           onSend={() => void send(input)}
           inputRef={inputRef}
@@ -302,7 +302,7 @@ function RichMessage({
   );
 }
 
-function Composer({
+function ComposerFixed({
   input, setInput, busy, onSend, inputRef, placeholder,
 }: {
   input: string; setInput: (v: string) => void; busy: boolean;
@@ -310,6 +310,8 @@ function Composer({
 }) {
   return (
     <div style={{
+      position: "fixed", left: "50%", transform: "translateX(-50%)",
+      bottom: 76, width: "100%", maxWidth: 430, zIndex: 35,
       padding: "10px 12px", background: "#fff", borderTop: "1px solid var(--dy-border)",
       display: "flex", alignItems: "flex-end", gap: 8,
     }}>
