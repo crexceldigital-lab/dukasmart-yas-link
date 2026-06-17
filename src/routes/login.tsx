@@ -79,10 +79,15 @@ function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", maxWidth: 430, margin: "0 auto", background: "linear-gradient(180deg,#1A3E6F 0%,#0f2d55 35%,#0f2d55 35%,#F0F4F8 35%)" }}>
-      <div style={{ padding: "44px 22px 36px", color: "#fff" }}>
-        <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: "-0.02em" }}>Duka<span style={{ color: "#00A86B" }}>Yangu</span></div>
-        <div style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>Powered by YAS Business & Mixx</div>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", maxWidth: 430, margin: "0 auto", background: "linear-gradient(180deg,#123274 0%,#0B1F4D 38%,#F7F8FB 38%)" }}>
+      <div style={{ padding: "40px 22px 32px", color: "#fff", display: "flex", alignItems: "center", gap: 14 }}>
+        <YasLogoBig />
+        <div>
+          <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: "0.02em", lineHeight: 1 }}>
+            DUKA <span style={{ color: "#FFD100" }}>SMART</span>
+          </div>
+          <div style={{ fontSize: 12.5, opacity: 0.8, marginTop: 6 }}>Powered by YAS Business & Mixx</div>
+        </div>
       </div>
       <div style={{ background: "#fff", borderRadius: "28px 28px 0 0", padding: 24, flex: 1, marginTop: 8 }}>
         {step === 1 && (

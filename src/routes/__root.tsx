@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "DUKA SMART — POS kwa Mixx by Yas" },
       { name: "description", content: "Mfumo wa mauzo kwa wajasiriamali wa Kitanzania. Powered by YAS Business & Mixx by Yas." },
-      { name: "theme-color", content: "#1A3E6F" },
+      { name: "theme-color", content: "#123274" },
       { property: "og:title", content: "DUKA SMART" },
       { property: "og:description", content: "POS mini-app kwa vijana wa Tanzania. Lipa kwa Mixx by Yas." },
       { property: "og:type", content: "website" },
