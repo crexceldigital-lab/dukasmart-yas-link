@@ -7,7 +7,9 @@ import { formatTZS, categoryIcon } from "@/lib/duka/utils";
 import { Modal } from "@/components/duka/Modal";
 import { useToast } from "@/components/duka/Toast";
 import { useI18n } from "@/lib/duka/i18n";
-import { Package, Plus, Pencil, ToggleLeft, Trash2, Save, CheckCircle2, Upload, X, ImageIcon } from "lucide-react";
+import { Package, Plus, Pencil, ToggleLeft, Trash2, Save, CheckCircle2, Upload, X, ImageIcon, AlertTriangle, FileText } from "lucide-react";
+import { useProGate } from "@/lib/duka/useProGate";
+import { generateCatalogue } from "@/lib/duka/pdfCatalogue";
 
 export const Route = createFileRoute("/bidhaa")({
   head: () => ({ meta: [{ title: "Bidhaa — DUKA SMART" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
@@ -18,22 +20,59 @@ function Bidhaa() {
   const { products, merchant, addProduct, updateProduct, toggleProduct, deleteProduct } = useDuka();
   const toast = useToast();
   const { t } = useI18n();
+  const { isPro, openUpgrade, requirePro } = useProGate();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [dismissLow, setDismissLow] = useState(false);
 
-  const startAdd = () => { setEditing(null); setOpen(true); };
+  const startAdd = () => {
+    if (!isPro && products.length >= 20) { openUpgrade(); return; }
+    setEditing(null); setOpen(true);
+  };
   const startEdit = (p: Product) => { setEditing(p); setOpen(true); };
+
+  const lowStock = isPro ? products.filter(p => p.stockCount != null && p.stockCount <= 5 && p.isAvailable) : [];
+
+  const exportPdf = () => requirePro(async () => {
+    if (!merchant) return;
+    try { await generateCatalogue(merchant, products); toast(t("Katalogi imetengenezwa", "Catalogue generated")); }
+    catch { toast(t("Imeshindikana", "Failed to generate")); }
+  });
 
   return (
     <>
       <Topbar
         title={t("Bidhaa Zangu", "My Products")}
-        subtitle={`${products.length} / 20 ${t("bidhaa", "products")}`}
+        subtitle={`${products.length}${isPro ? "" : " / 20"} ${t("bidhaa", "products")}`}
         right={
           <button onClick={startAdd} aria-label={t("Ongeza bidhaa", "Add product")} style={{ width: 38, height: 38, borderRadius: 12, background: "var(--dy-yellow)", color: "var(--dy-navy)", border: "none", fontSize: 20, fontWeight: 800, cursor: "pointer" }}>+</button>
         }
       />
       <div style={{ padding: 16 }}>
+        {isPro && lowStock.length > 0 && !dismissLow && (
+          <div style={{ background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.45)", color: "var(--dy-navy)", padding: 12, borderRadius: 12, fontSize: 13, display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <AlertTriangle size={18} color="#F5A623" strokeWidth={2.5} />
+            <span style={{ flex: 1 }}>
+              <b>{lowStock.length}</b> {t("bidhaa zinaisha stoki. Angalia.", lowStock.length === 1 ? "product is running low on stock." : "products are running low on stock.")}
+            </span>
+            <button onClick={() => setDismissLow(true)} style={{ background: "transparent", border: "none", color: "var(--dy-navy)", cursor: "pointer", display: "inline-flex" }} aria-label="dismiss">
+              <X size={16} strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
+
+        {products.length > 0 && (
+          <button
+            className="dy-btn dy-btn-ghost"
+            onClick={exportPdf}
+            style={{ marginBottom: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+          >
+            <FileText size={16} strokeWidth={2.5} /> {t("Katalogi ya PDF", "PDF Catalogue")}
+            {!isPro && <span style={{ marginLeft: 4 }}><X size={12} /></span>}
+            {!isPro && <span style={{ fontSize: 10, fontWeight: 900, background: "#F5A623", color: "#fff", padding: "2px 6px", borderRadius: 999 }}>PRO</span>}
+          </button>
+        )}
+
         {products.length === 0 ? (
           <div style={{ padding: "60px 16px", textAlign: "center" }}>
             <Package size={56} strokeWidth={1.5} color="var(--dy-muted)" />
@@ -47,11 +86,17 @@ function Bidhaa() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {products.map(p => {
               const CatIcon = categoryIcon(merchant?.category ?? "Other");
+              const low = isPro && p.stockCount != null && p.stockCount <= 5 && p.isAvailable;
               return (
               <div key={p.id} className="dy-card" style={{ padding: 10, display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ position: "relative", aspectRatio: "1", borderRadius: 10, background: "#F0F4F8", display: "grid", placeItems: "center", overflow: "hidden" }}>
                   {p.photoUrl ? <img src={p.photoUrl} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <CatIcon size={44} strokeWidth={1.5} color="var(--dy-navy)" />}
                   <span className="dy-pill" style={{ position: "absolute", top: 6, right: 6, background: p.isAvailable ? "rgba(0,168,107,0.95)" : "rgba(231,76,60,0.95)", color: "#fff" }}>{p.isAvailable ? t("Inapatikana", "Available") : t("Imeisha", "Out")}</span>
+                  {low && (
+                    <span className="dy-pill" style={{ position: "absolute", top: 6, left: 6, background: "#F5A623", color: "#fff", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <AlertTriangle size={10} strokeWidth={3} /> {t("Stoki Inaisha", "Low Stock")}
+                    </span>
+                  )}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.2, minHeight: 32 }}>{p.name}</div>
                 <div style={{ fontSize: 14, fontWeight: 900, color: "var(--dy-green)" }}>{formatTZS(p.priceTzs)}</div>
