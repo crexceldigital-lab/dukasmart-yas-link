@@ -6,7 +6,7 @@ import { formatTZS, formatDate } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 
 export const Route = createFileRoute("/mauzo")({
-  head: () => ({ meta: [{ title: "Mauzo — Duka Yangu" }, { name: "description", content: "Historia kamili ya mauzo yako." }] }),
+  head: () => ({ meta: [{ title: "Mauzo — DUKA SMART" }, { name: "description", content: "Historia kamili ya mauzo yako." }] }),
   component: () => (<AuthGuard><Shell><Mauzo /></Shell></AuthGuard>),
 });
 

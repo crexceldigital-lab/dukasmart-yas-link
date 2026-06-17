@@ -4,18 +4,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Duka Yangu brand tokens */
+/* DUKA SMART — YAS brand tokens */
 :root {
-  --dy-navy: #1A3E6F;
-  --dy-navy-2: #2A5FAF;
+  --dy-navy: #123274;
+  --dy-navy-2: #1B49A6;
+  --dy-navy-deep: #0B1F4D;
+  --dy-yellow: #FFD100;
+  --dy-yellow-soft: #FFF4B8;
   --dy-green: #00A86B;
-  --dy-yellow: #F5A623;
   --dy-red: #E74C3C;
-  --dy-bg: #F0F4F8;
+  --dy-bg: #F7F8FB;
   --dy-surface: #FFFFFF;
-  --dy-border: #E2E8F0;
-  --dy-text: #1A202C;
-  --dy-muted: #718096;
+  --dy-border: #E4E8EF;
+  --dy-text: #0F172A;
+  --dy-muted: #6B7280;
 }
 
 html, body, #root {
@@ -60,7 +62,7 @@ html, body, #root {
   border-radius: 12px;
 }
 .dy-tab svg { width: 22px; height: 22px; }
-.dy-tab.active { color: var(--dy-navy); background: rgba(26,62,111,0.08); }
+.dy-tab.active { color: var(--dy-navy); background: rgba(18,50,116,0.08); }
 
 .dy-card {
   background: #fff; border-radius: 14px; padding: 16px;
@@ -68,9 +70,16 @@ html, body, #root {
   border: 1px solid var(--dy-border);
 }
 .dy-hero {
-  background: linear-gradient(135deg, #1A3E6F, #2A5FAF);
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #123274 0%, #1B49A6 100%);
   color: #fff; border-radius: 18px; padding: 20px;
-  box-shadow: 0 8px 24px rgba(26,62,111,0.25);
+  box-shadow: 0 8px 24px rgba(18,50,116,0.28);
+}
+.dy-hero::after {
+  content: ""; position: absolute; right: -40px; bottom: -60px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,209,0,0.35) 0%, rgba(255,209,0,0) 70%);
+  pointer-events: none;
 }
 
 .dy-btn {
@@ -80,8 +89,9 @@ html, body, #root {
   transition: transform .08s ease, opacity .15s ease;
 }
 .dy-btn:active { transform: scale(0.98); }
-.dy-btn-primary { background: var(--dy-green); color: #fff; }
+.dy-btn-primary { background: var(--dy-yellow); color: var(--dy-navy); }
 .dy-btn-navy { background: var(--dy-navy); color: #fff; }
+.dy-btn-success { background: var(--dy-green); color: #fff; }
 .dy-btn-ghost { background: transparent; color: var(--dy-text); border: 1px solid var(--dy-border); }
 .dy-btn-danger-ghost { background: transparent; color: var(--dy-red); border: 1px solid var(--dy-border); }
 .dy-btn:disabled { opacity: .55; cursor: not-allowed; }
@@ -91,7 +101,7 @@ html, body, #root {
   padding: 12px 14px; font-size: 15px; background: #fff; color: var(--dy-text);
   font-family: inherit; min-height: 48px; outline: none;
 }
-.dy-input:focus { border-color: var(--dy-navy); box-shadow: 0 0 0 3px rgba(26,62,111,0.12); }
+.dy-input:focus { border-color: var(--dy-navy); box-shadow: 0 0 0 3px rgba(18,50,116,0.15); }
 .dy-label { font-size: 12.5px; font-weight: 600; color: var(--dy-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: .04em; }
 
 .dy-pill {
@@ -126,7 +136,7 @@ html, body, #root {
   border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff;
   animation: dy-spin .8s linear infinite; display: inline-block;
 }
-.dy-spinner-dark { border-color: rgba(26,62,111,0.2); border-top-color: var(--dy-navy); }
+.dy-spinner-dark { border-color: rgba(18,50,116,0.2); border-top-color: var(--dy-navy); }
 
 .dy-celebrate { animation: dy-pop .5s cubic-bezier(.2,.8,.2,1); }
 

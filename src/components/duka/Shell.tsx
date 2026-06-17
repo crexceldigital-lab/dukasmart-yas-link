@@ -1,12 +1,16 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { YasLogo } from "./YasLogo";
 
 export function Topbar({ title, subtitle, right }: { title: ReactNode; subtitle?: ReactNode; right?: ReactNode }) {
   return (
     <div className="dy-topbar">
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <h1 style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
-        {subtitle ? <div className="sub">{subtitle}</div> : null}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+        <YasLogo size={32} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h1 style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h1>
+          {subtitle ? <div className="sub">{subtitle}</div> : null}
+        </div>
       </div>
       {right}
     </div>

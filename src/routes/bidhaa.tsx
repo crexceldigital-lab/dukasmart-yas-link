@@ -8,7 +8,7 @@ import { Modal } from "@/components/duka/Modal";
 import { useToast } from "@/components/duka/Toast";
 
 export const Route = createFileRoute("/bidhaa")({
-  head: () => ({ meta: [{ title: "Bidhaa — Duka Yangu" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
+  head: () => ({ meta: [{ title: "Bidhaa — DUKA SMART" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
   component: () => (<AuthGuard><Shell><Bidhaa /></Shell></AuthGuard>),
 });
 
