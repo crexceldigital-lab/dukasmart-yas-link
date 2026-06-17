@@ -68,7 +68,6 @@ function Bidhaa() {
             style={{ marginBottom: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}
           >
             <FileText size={16} strokeWidth={2.5} /> {t("Katalogi ya PDF", "PDF Catalogue")}
-            {!isPro && <span style={{ marginLeft: 4 }}><X size={12} /></span>}
             {!isPro && <span style={{ fontSize: 10, fontWeight: 900, background: "#F5A623", color: "#fff", padding: "2px 6px", borderRadius: 999 }}>PRO</span>}
           </button>
         )}
