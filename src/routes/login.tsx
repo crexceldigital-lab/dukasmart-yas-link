@@ -5,6 +5,7 @@ import { useToast } from "@/components/duka/Toast";
 import { normalizePhone } from "@/lib/duka/utils";
 import { YasLogo } from "@/components/duka/YasLogo";
 import { LangToggle, useI18n } from "@/lib/duka/i18n";
+import { Store } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Karibu — DUKA SMART" }, { name: "description", content: "Ingia kwenye DUKA SMART kwa nambari yako ya YAS." }] }),
@@ -58,7 +59,7 @@ function LoginPage() {
         creditScore: 78,
         createdAt: "2026-01-01T00:00:00Z",
       };
-      login(m); toast(t("Karibu tena! 👋", "Welcome back! 👋")); navigate({ to: "/" });
+      login(m); toast(t("Karibu tena!", "Welcome back!")); navigate({ to: "/" });
     } else {
       setIsNew(true); setStep(3);
     }
@@ -78,7 +79,7 @@ function LoginPage() {
       creditScore: 15,
       createdAt: new Date().toISOString(),
     };
-    login(m); toast(t("🏪 Duka lako limefunguliwa!", "🏪 Your shop is open!")); navigate({ to: "/" });
+    login(m); toast(t("Duka lako limefunguliwa!", "Your shop is open!")); navigate({ to: "/" });
   };
 
   return (
@@ -96,11 +97,11 @@ function LoginPage() {
       <div style={{ background: "#fff", borderRadius: "28px 28px 0 0", padding: 24, flex: 1, marginTop: 8 }}>
         {step === 1 && (
           <>
-            <h1 style={{ fontSize: 22, fontWeight: 800 }}>{t("Karibu! 👋", "Welcome! 👋")}</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 800 }}>{t("Karibu!", "Welcome!")}</h1>
             <p style={{ fontSize: 14, color: "var(--dy-muted)", marginTop: 6 }}>{t("Ingiza nambari yako ya YAS ili kuanza", "Enter your YAS number to get started")}</p>
             <label className="dy-label" style={{ marginTop: 22 }}>{t("Nambari ya Simu", "Phone Number")}</label>
             <div style={{ display: "flex", gap: 8 }}>
-              <div className="dy-input" style={{ width: 96, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700 }}>🇹🇿 +255</div>
+              <div className="dy-input" style={{ width: 96, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700 }}>TZ +255</div>
               <input className="dy-input" inputMode="numeric" placeholder="711 000 001" value={phone} onChange={e => setPhone(e.target.value)} />
             </div>
             <button className="dy-btn dy-btn-primary" style={{ marginTop: 20 }} onClick={sendOtp}>{t("Endelea", "Continue")}</button>
@@ -124,7 +125,7 @@ function LoginPage() {
         )}
         {step === 3 && (
           <>
-            <h1 style={{ fontSize: 22, fontWeight: 800 }}>{t("Fungua Duka Lako 🏪", "Open Your Shop 🏪")}</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 8 }}><Store size={22} strokeWidth={2.5} /> {t("Fungua Duka Lako", "Open Your Shop")}</h1>
             <p style={{ fontSize: 14, color: "var(--dy-muted)", marginTop: 6 }}>{t("Tunahitaji taarifa chache za biashara yako", "We need a few details about your business")}</p>
             <div style={{ display: "grid", gap: 12, marginTop: 18 }}>
               <div><label className="dy-label">{t("Jina la Biashara *", "Business Name *")}</label><input className="dy-input" value={biz.businessName} onChange={e => setBiz(b => ({ ...b, businessName: e.target.value }))} placeholder={t("k.m. Mama Asha Foods", "e.g. Mama Asha Foods")} /></div>
@@ -141,7 +142,9 @@ function LoginPage() {
               <div><label className="dy-label">{t(`Maelezo (${120 - biz.bio.length} kushoto)`, `Description (${120 - biz.bio.length} left)`)}</label>
                 <textarea className="dy-input" rows={3} maxLength={120} value={biz.bio} onChange={e => setBiz(b => ({ ...b, bio: e.target.value }))} placeholder={t("Eleza biashara yako kwa kifupi", "Briefly describe your business")} />
               </div>
-              <button className="dy-btn dy-btn-primary" onClick={register}>{t("🏪 Fungua Duka Langu", "🏪 Open My Shop")}</button>
+              <button className="dy-btn dy-btn-primary" onClick={register} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <Store size={16} strokeWidth={2.5} /> {t("Fungua Duka Langu", "Open My Shop")}
+              </button>
             </div>
           </>
         )}

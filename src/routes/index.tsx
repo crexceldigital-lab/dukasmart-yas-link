@@ -7,6 +7,7 @@ import { formatTZS, formatDate, getGreeting, getTier } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 import { PaymentLinkModal } from "@/components/duka/PaymentLinkModal";
 import { useI18n } from "@/lib/duka/i18n";
+import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -27,7 +28,7 @@ function Dashboard() {
     .map(p => ({ ...p, revenue: (p.unitsSold ?? 0) * p.priceTzs }))
     .sort((a,b) => (b.unitsSold ?? 0) - (a.unitsSold ?? 0))
     .slice(0, 3);
-  const medals = ["🥇","🥈","🥉"];
+  const medalColors = ["#FFD100", "#C0C0C0", "#CD7F32"];
   const recent = transactions.slice(0, 5);
 
   return (
@@ -39,11 +40,14 @@ function Dashboard() {
       />
       <div style={{ padding: 16, display: "grid", gap: 14 }}>
         <div className="dy-hero">
-          <div style={{ fontSize: 13, opacity: 0.85 }}>{getGreeting()}, {merchant.businessName.split(" ")[0]} 👋</div>
+          <div style={{ fontSize: 13, opacity: 0.85 }}>{getGreeting()}, {merchant.businessName.split(" ")[0]}</div>
           <div style={{ fontSize: 13, opacity: 0.7, marginTop: 6 }}>{t("Mauzo ya leo", "Today's sales")}</div>
           <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.02em", marginTop: 2 }}>{formatTZS(stats.today.total)}</div>
           <div style={{ fontSize: 12.5, opacity: 0.8 }}>{stats.today.count} {t("miamala leo", "transactions today")}</div>
-          <button className="dy-btn dy-btn-primary" style={{ marginTop: 14 }} onClick={() => setOpen(true)}>{t("⚡ Unda Kiungo cha Malipo", "⚡ Create Payment Link")}</button>
+          <button className="dy-btn dy-btn-primary" style={{ marginTop: 14, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }} onClick={() => setOpen(true)}>
+            <Zap size={16} strokeWidth={2.5} />
+            {t("Unda Kiungo cha Malipo", "Create Payment Link")}
+          </button>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -59,11 +63,11 @@ function Dashboard() {
 
         {top.length > 0 && (
           <section className="dy-card">
-            <h3 style={sectionTitle}>{t("⭐ Bidhaa Zinazouza", "⭐ Top Products")}</h3>
+            <h3 style={sectionTitle}><Star size={14} strokeWidth={2.5} style={iconInline} /> {t("Bidhaa Zinazouza", "Top Products")}</h3>
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {top.map((p, i) => (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ fontSize: 22 }}>{medals[i]}</div>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", display: "grid", placeItems: "center", background: medalColors[i], color: "var(--dy-navy)", fontWeight: 900, fontSize: 13, flexShrink: 0 }}>{i + 1}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 700 }}>{p.name}</div>
                     <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>{p.unitsSold ?? 0} {t("zimeuzwa", "sold")}</div>
@@ -77,11 +81,11 @@ function Dashboard() {
 
         {rewards.length > 0 && (
           <section className="dy-card">
-            <h3 style={sectionTitle}>{t("🎁 Zawadi za YAS", "🎁 YAS Rewards")}</h3>
+            <h3 style={sectionTitle}><Gift size={14} strokeWidth={2.5} style={iconInline} /> {t("Zawadi za YAS", "YAS Rewards")}</h3>
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {rewards.map(r => (
                 <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#FFD100,#E0B400)", color: "#123274", display: "grid", placeItems: "center", fontSize: 18 }}>🎁</div>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#FFD100,#E0B400)", color: "#123274", display: "grid", placeItems: "center" }}><Gift size={20} strokeWidth={2.5} /></div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 800, color: "var(--dy-yellow)" }}>{r.value}</div>
                     <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>{r.label}</div>
@@ -95,22 +99,25 @@ function Dashboard() {
         <section className="dy-card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={sectionTitle}>{t("Miamala ya Hivi Karibuni", "Recent Transactions")}</h3>
-            <Link to="/mauzo" style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-navy)" }}>{t("Yote →", "All →")}</Link>
+            <Link to="/mauzo" style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-navy)", display: "inline-flex", alignItems: "center", gap: 4 }}>{t("Yote", "All")} <ArrowRight size={12} strokeWidth={2.5} /></Link>
           </div>
           {recent.length === 0 ? (
             <div style={{ padding: "30px 10px", textAlign: "center" }}>
-              <div style={{ fontSize: 40 }}>🧾</div>
+              <div style={{ display: "inline-flex", color: "var(--dy-muted)" }}><ReceiptText size={40} strokeWidth={1.5} /></div>
               <div style={{ fontSize: 15, fontWeight: 700, marginTop: 8 }}>{t("Bado Hakuna Miamala", "No Transactions Yet")}</div>
               <p style={{ fontSize: 13, color: "var(--dy-muted)", marginTop: 4 }}>{t("Unda kiungo cha kwanza ili kuanza kuuza", "Create your first link to start selling")}</p>
-              <button className="dy-btn dy-btn-primary" style={{ marginTop: 12, width: "auto", padding: "10px 18px" }} onClick={() => setOpen(true)}>{t("⚡ Unda Kiungo", "⚡ Create Link")}</button>
+              <button className="dy-btn dy-btn-primary" style={{ marginTop: 12, width: "auto", padding: "10px 18px", display: "inline-flex", alignItems: "center", gap: 8 }} onClick={() => setOpen(true)}>
+                <Zap size={14} strokeWidth={2.5} /> {t("Unda Kiungo", "Create Link")}
+              </button>
             </div>
           ) : (
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {recent.map(t => {
-                const icon = t.status === "confirmed" ? "✅" : t.status === "pending" ? "⏳" : "❌";
+                const Icon = t.status === "confirmed" ? CheckCircle2 : t.status === "pending" ? Clock : XCircle;
+                const iconColor = t.status === "confirmed" ? "var(--dy-green)" : t.status === "pending" ? "var(--dy-yellow)" : "var(--dy-red)";
                 return (
                   <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ fontSize: 18 }}>{icon}</div>
+                    <Icon size={18} strokeWidth={2.5} color={iconColor} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.productName}</div>
                       <div style={{ fontSize: 11.5, color: "var(--dy-muted)" }}>{formatDate(t.createdAt)}</div>
@@ -130,6 +137,7 @@ function Dashboard() {
 }
 
 const sectionTitle: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: "var(--dy-text)" };
+const iconInline: React.CSSProperties = { display: "inline-block", verticalAlign: "-2px", marginRight: 4, color: "var(--dy-navy)" };
 
 function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: string }) {
   return (
