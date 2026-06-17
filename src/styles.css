@@ -61,16 +61,16 @@ small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 430px;
   background: #fff; border-top: 1px solid var(--dy-border);
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   z-index: 40; padding: 6px 4px 10px;
 }
 .dy-tab {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 6px 4px; color: #94A3B8; font-size: 11px; font-weight: 600;
+  padding: 6px 2px; color: #94A3B8; font-size: 10.5px; font-weight: 600;
   text-decoration: none; min-height: 48px; justify-content: center;
   border-radius: 12px;
 }
-.dy-tab svg { width: 22px; height: 22px; }
+.dy-tab svg { width: 20px; height: 20px; }
 .dy-tab.active { color: var(--dy-navy); background: rgba(18,50,116,0.08); }
 
 .dy-card {
