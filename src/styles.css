@@ -25,7 +25,16 @@ html, body, #root {
   color: var(--dy-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
+  letter-spacing: -0.005em;
 }
+
+/* Typography scale — mobile-first, aligned with YAS guidelines */
+h1, .dy-h1 { font-size: 22px; font-weight: 800; line-height: 1.2; letter-spacing: -0.01em; }
+h2, .dy-h2 { font-size: 18px; font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; }
+h3, .dy-h3 { font-size: 15px; font-weight: 700; line-height: 1.3; }
+p, .dy-body { font-size: 14px; line-height: 1.5; }
+small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
 
 /* App shell: mobile column centered on desktop */
 .dy-shell {

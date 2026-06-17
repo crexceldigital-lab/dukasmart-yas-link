@@ -31,7 +31,7 @@ function Mauzo() {
         ) : (
           <div className="dy-card" style={{ padding: 0, overflow: "hidden" }}>
             {transactions.map((t, i) => {
-              const colors = { confirmed: "#00A86B", pending: "#F5A623", failed: "#E74C3C" } as const;
+              const colors = { confirmed: "var(--dy-green)", pending: "var(--dy-yellow)", failed: "var(--dy-red)" } as const;
               const icon = t.status === "confirmed" ? "✓" : t.status === "pending" ? "⏳" : "✕";
               return (
                 <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderTop: i === 0 ? "none" : "1px solid var(--dy-border)" }}>
