@@ -7,7 +7,10 @@ import { formatTZS, formatDate, getGreeting, getTier } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 import { PaymentLinkModal } from "@/components/duka/PaymentLinkModal";
 import { useI18n } from "@/lib/duka/i18n";
-import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Trophy, Sparkles } from "lucide-react";
+import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Sparkles, Users } from "lucide-react";
+import { useProGate } from "@/lib/duka/useProGate";
+import { ProLockOverlay } from "@/components/duka/ProLockOverlay";
+import { formatDate as fmtDate } from "@/lib/duka/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -18,8 +21,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const { merchant, products, transactions, rewards, stats } = useDuka();
+  const { merchant, products, transactions, rewards, stats, customers } = useDuka();
   const { t, lang } = useI18n();
+  const { isPro } = useProGate();
   const [open, setOpen] = useState(false);
   if (!merchant) return null;
   const tier = getTier(merchant.creditScore);
@@ -30,6 +34,38 @@ function Dashboard() {
     .slice(0, 3);
   const medalColors = ["#FFD100", "#C0C0C0", "#CD7F32"];
   const recent = transactions.slice(0, 5);
+
+  const topCustomers = customers.slice(0, 5);
+  const customerCard = (
+    <section className="dy-card">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h3 style={sectionTitle}><Users size={14} strokeWidth={2.5} style={iconInline} /> {t("Wateja Wako", "Your Customers")}</h3>
+        {isPro && customers.length > 5 && (
+          <Link to="/wateja" style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-navy)", display: "inline-flex", alignItems: "center", gap: 4 }}>{t("Tazama Wote", "View All")} <ArrowRight size={12} strokeWidth={2.5} /></Link>
+        )}
+      </div>
+      {topCustomers.length === 0 ? (
+        <div style={{ padding: "20px 10px", textAlign: "center", color: "var(--dy-muted)", fontSize: 13 }}>
+          {t("Bado hakuna wateja", "No customers yet")}
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+          {topCustomers.map(c => (
+            <div key={c.phone} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--dy-navy)", color: "#fff", display: "grid", placeItems: "center", fontWeight: 900, fontSize: 13, flexShrink: 0 }}>
+                {(c.name ?? c.phone).slice(0, 1).toUpperCase()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name ?? `+${c.phone}`}</div>
+                <div style={{ fontSize: 11.5, color: "var(--dy-muted)" }}>{c.purchaseCount} {t("ununuzi", "purchases")} • {fmtDate(c.lastPurchase)}</div>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--dy-green)" }}>{formatTZS(c.totalSpent)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
 
   return (
     <>
@@ -78,6 +114,8 @@ function Dashboard() {
             </div>
           </section>
         )}
+
+        {isPro ? customerCard : <ProLockOverlay message={t("Pandisha kuona wateja wako", "Upgrade to see your customers")}>{customerCard}</ProLockOverlay>}
 
         {rewards.length > 0 && (
           <section className="dy-card">
