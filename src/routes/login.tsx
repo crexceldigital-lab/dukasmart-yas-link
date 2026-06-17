@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDuka, type Merchant } from "@/lib/duka/store";
 import { useToast } from "@/components/duka/Toast";
 import { normalizePhone } from "@/lib/duka/utils";
+import { YasLogo } from "@/components/duka/YasLogo";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Karibu — DUKA SMART" }, { name: "description", content: "Ingia kwenye DUKA SMART kwa nambari yako ya YAS." }] }),
@@ -81,7 +82,7 @@ function LoginPage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", maxWidth: 430, margin: "0 auto", background: "linear-gradient(180deg,#123274 0%,#0B1F4D 38%,#F7F8FB 38%)" }}>
       <div style={{ padding: "40px 22px 32px", color: "#fff", display: "flex", alignItems: "center", gap: 14 }}>
-        <YasLogoBig />
+        <YasLogo size={56} />
         <div>
           <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: "0.02em", lineHeight: 1 }}>
             DUKA <span style={{ color: "#FFD100" }}>SMART</span>
