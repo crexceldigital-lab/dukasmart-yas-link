@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: false, error: "DB error" }), { status: 500, headers: CORS });
   }
 
-  const sent = await sendAT(phoneE164, otp);
+  const sent = await sendAT(phoneE164, otp, req.headers.get("x-app-name"));
   if (!sent.ok) {
     console.error("[send-otp] AT:", sent.error);
     return new Response(JSON.stringify({ ok: false, error: sent.error }), { status: 502, headers: CORS });
