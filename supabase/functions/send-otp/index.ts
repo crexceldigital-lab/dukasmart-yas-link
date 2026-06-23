@@ -80,8 +80,12 @@ async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; er
 
   let json: { SMSMessageData?: { Recipients?: { status?: string; statusCode?: number; cost?: string }[] } };
   try { json = JSON.parse(r.text); } catch { return { ok: false, error: `AT non-JSON: ${r.text.slice(0, 300)}` }; }
+  console.log("[send-otp] AT raw response:", r.text.slice(0, 500));
   const rec = json?.SMSMessageData?.Recipients?.[0];
-  if (!rec) return { ok: false, error: "AT returned no recipient — check Sender ID approval and credit balance" };
+  if (!rec) {
+    const msg = (json as { SMSMessageData?: { Message?: string } })?.SMSMessageData?.Message ?? "no recipient";
+    return { ok: false, error: `AT: ${msg}` };
+  }
   if (rec.status !== "Success") return { ok: false, error: `AT recipient status: ${rec.status}` };
   return { ok: true };
 }
