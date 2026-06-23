@@ -133,9 +133,29 @@ function LoginPage() {
               ))}
             </div>
             {busy&&<div style={{ textAlign:"center", marginTop:14, display:"flex", alignItems:"center", justifyContent:"center", gap:6, color:"var(--dy-muted)", fontSize:13 }}><Loader2 size={14} className="animate-spin"/>{t("Inathibitisha...","Verifying...")}</div>}
-            <div style={{ textAlign:"center", marginTop:16, fontSize:13 }}>
-              {countdown>0?<span style={{ color:"var(--dy-muted)" }}>{t(`Tuma tena baada ya ${countdown}s`,`Resend in ${countdown}s`)}</span>
-                :<button onClick={sendOtp} style={{ background:"none", border:"none", color:"var(--dy-navy)", fontWeight:700, cursor:"pointer" }}>{t("Tuma msimbo tena","Resend code")}</button>}
+            <div style={{ textAlign:"center", marginTop:16 }}>
+              <button
+                onClick={sendOtp}
+                disabled={countdown>0 || busy}
+                style={{
+                  background: countdown>0 ? "var(--dy-surface)" : "transparent",
+                  border: "1.5px solid " + (countdown>0 ? "var(--dy-border)" : "var(--dy-navy)"),
+                  color: countdown>0 ? "var(--dy-muted)" : "var(--dy-navy)",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  padding: "10px 18px",
+                  borderRadius: 10,
+                  cursor: countdown>0 ? "not-allowed" : "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                {busy && countdown===0 && <Loader2 size={14} className="animate-spin"/>}
+                {countdown>0
+                  ? t(`Tuma tena baada ya ${countdown}s`, `Resend in ${countdown}s`)
+                  : t("Tuma msimbo tena","Resend code")}
+              </button>
             </div>
             <button onClick={()=>{setStep(1);setOtp(Array(6).fill(""));}} style={{ marginTop:12, background:"none", border:"none", color:"var(--dy-muted)", fontSize:12, cursor:"pointer", display:"block", margin:"12px auto 0" }}>
               ← {t("Badilisha nambari","Change number")}
