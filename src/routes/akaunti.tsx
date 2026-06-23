@@ -52,10 +52,10 @@ function Akaunti() {
     toast(t("Kiungo kimehifadhiwa", "Link saved"));
   };
 
-  const addStaff = () => {
+  const addStaff = async () => {
     const n = normalizePhone(staffInput);
     if (n.length < 12) { toast(t("Nambari si sahihi", "Invalid number")); return; }
-    const ok = addStaffPhone(n);
+    const ok = await addStaffPhone(n);
     if (!ok) { toast(t("Imefika kikomo au tayari ipo", "Limit reached or already added")); return; }
     setStaffInput("");
     toast(t("Mfanyakazi ameongezwa", "Staff added"));

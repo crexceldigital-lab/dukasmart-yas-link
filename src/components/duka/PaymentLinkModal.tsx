@@ -29,15 +29,15 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
   const reset = () => { setLink(null); setCopied(false); setCustomAmount(""); setCustomLabel(""); setBulkLinks(null); };
   const close = () => { reset(); onClose(); };
 
-  const submit = () => {
+  const submit = async () => {
     if (mode === "product") {
       const pid = productId || available[0]?.id;
       if (!pid) { toast(t("Hakuna bidhaa zinazopatikana", "No available products")); return; }
-      setLink(createLink({ productId: pid }));
+      setLink(await createLink({ productId: pid }));
     } else {
       const amt = Number((customAmount || "").replace(/\D/g, ""));
       if (!amt) { toast(t("Weka kiasi sahihi", "Enter a valid amount")); return; }
-      setLink(createLink({ customAmountTzs: amt, customLabel: customLabel || t("Malipo", "Payment") }));
+      setLink(await createLink({ customAmountTzs: amt, customLabel: customLabel || t("Malipo", "Payment") }));
     }
   };
 
@@ -81,7 +81,7 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
       : `*DUKA SMART* — Ombi la Malipo\n\nBidhaa: ${linkRec.label}\nKiasi: ${formatTZS(linkRec.amount)}\nKiungo cha Malipo: ${url}\n\nLipa salama kupitia *Mixx by Yas*.\n— ${merchant?.businessName ?? "DUKA SMART"}`;
   };
 
-  const generateBulk = () => {
+  const generateBulk = async () => {
     const validRows = bulkRows.filter(r => r.phone.replace(/\D/g, "").length >= 9);
     if (validRows.length === 0) { toast(t("Weka angalau mnunuzi mmoja", "Add at least one buyer")); return; }
     let amt = 0; let lbl = "";
@@ -94,10 +94,10 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
       if (!amt) { toast(t("Weka kiasi sahihi", "Enter a valid amount")); return; }
       lbl = t("Malipo", "Payment");
     }
-    const out = validRows.map(row => ({
+    const out = await Promise.all(validRows.map(async row => ({
       row,
-      link: createLink(bulkUseProduct ? { productId: bulkProductId } : { customAmountTzs: amt, customLabel: lbl }),
-    }));
+      link: await createLink(bulkUseProduct ? { productId: bulkProductId } : { customAmountTzs: amt, customLabel: lbl }),
+    })));
     setBulkLinks(out);
     toast(t(`Viungo ${out.length} vimetengenezwa`, `${out.length} links generated`));
   };
