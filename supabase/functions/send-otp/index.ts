@@ -28,25 +28,23 @@ function genOtp(): string {
 }
 
 async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; error?: string }> {
-  const apiKey = Deno.env.get("AT_API_KEY")?.trim();
-  const username = Deno.env.get("AT_USERNAME")?.trim();
+  const liveUsername = "DukaLangu";
+  const configuredUsername = Deno.env.get("AT_USERNAME")?.trim() || Deno.env.get("AFRICASTALKING_USERNAME")?.trim();
+  const username = configuredUsername && configuredUsername.toLowerCase() !== "sandbox" ? configuredUsername : liveUsername;
+  const apiKeys = [Deno.env.get("AT_API_KEY")?.trim(), Deno.env.get("AFRICASTALKING_API_KEY")?.trim()]
+    .filter((value): value is string => Boolean(value))
+    .filter((value, index, values) => values.indexOf(value) === index);
   const senderId = Deno.env.get("AT_SENDER_ID")?.trim() || Deno.env.get("AFRICASTALKING_SENDER_ID")?.trim();
 
-  if (!username || username.toLowerCase() === "sandbox") {
-    return {
-      ok: false,
-      error: "Real SMS is not configured: set AT_USERNAME to your live Africa's Talking app username, not sandbox.",
-    };
-  }
-  if (!apiKey) return { ok: false, error: "SMS gateway API key is not configured. Set AT_API_KEY to the API key from the same live Africa's Talking app as AT_USERNAME." };
+  if (!apiKeys.length) return { ok: false, error: "SMS gateway API key is not configured. Set AT_API_KEY to the API key from the same live Africa's Talking app as AT_USERNAME." };
 
   const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
   // Live SMS must use the production API host. Do not change this to api.sandbox.africastalking.com.
   const liveHost = "https://api.africastalking.com";
 
-  const attempt = async (user: string, includeSender: boolean) => {
+  const attempt = async (apiKey: string, includeSender: boolean) => {
     const params = new URLSearchParams({
-      username: user,
+      username,
       to: phoneE164,
       message,
       ...(includeSender && senderId ? { from: senderId } : {}),
@@ -57,8 +55,8 @@ async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; er
       body: params.toString(),
     });
     const text = await res.text();
-    console.log("[send-otp] live AT attempt user=", user, "sender=", includeSender && Boolean(senderId), "status=", res.status);
-    return { status: res.status, ok: res.ok, text, user };
+    console.log("[send-otp] live AT attempt user=", username, "keySource=", apiKey === Deno.env.get("AT_API_KEY")?.trim() ? "AT_API_KEY" : "AFRICASTALKING_API_KEY", "sender=", includeSender && Boolean(senderId), "status=", res.status);
+    return { status: res.status, ok: res.ok, text };
   };
 
   const parseAttempt = (text: string) => {
@@ -76,23 +74,26 @@ async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; er
   };
 
   let lastError = "SMS gateway rejected the request.";
-  const first = await attempt(username, true);
-  if (!first.ok) {
-    lastError = `HTTP ${first.status}: ${first.text.slice(0, 180)}`;
-  } else {
-    const parsed = parseAttempt(first.text);
-    if (parsed.ok) return { ok: true };
-    lastError = parsed.message;
+  for (const apiKey of apiKeys) {
+    const first = await attempt(apiKey, true);
+    if (!first.ok) {
+      lastError = `HTTP ${first.status}: ${first.text.slice(0, 180)}`;
+      if (first.status === 401) continue;
+    } else {
+      const parsed = parseAttempt(first.text);
+      if (parsed.ok) return { ok: true };
+      lastError = parsed.message;
 
-    if (senderId && /InvalidSenderId/i.test(parsed.message)) {
-      console.log("[send-otp] sender ID rejected; retrying live send without sender ID");
-      const retry = await attempt(username, false);
+      if (senderId && /InvalidSenderId/i.test(parsed.message)) {
+        console.log("[send-otp] sender ID rejected; retrying live send without sender ID");
+        const retry = await attempt(apiKey, false);
       if (!retry.ok) {
         lastError = `HTTP ${retry.status}: ${retry.text.slice(0, 180)}`;
       } else {
         const retryParsed = parseAttempt(retry.text);
         if (retryParsed.ok) return { ok: true };
         lastError = retryParsed.message;
+      }
       }
     }
   }
