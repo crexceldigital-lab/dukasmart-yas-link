@@ -28,19 +28,17 @@ function randomPassword(): string {
   return btoa(String.fromCharCode(...a)).replace(/[^A-Za-z0-9]/g, "") + "Aa1!";
 }
 
-async function findUserByEmail(email: string) {
-  // Paginate; small project so first pages are enough. Bump perPage if needed.
-  for (let page = 1; page <= 20; page++) {
-    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
-    if (error) throw error;
-    const hit = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-    if (hit) return hit;
-    if (data.users.length < 200) break;
-  }
-  return null;
+async function findUserIdByPhone(phone: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("phone_users")
+    .select("user_id")
+    .eq("phone", phone)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.user_id ?? null;
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: CORS });
 
@@ -93,31 +91,42 @@ Deno.serve(async (req) => {
   // Consume the OTP
   await supabase.from("phone_otps").update({ consumed: true }).eq("id", row.id);
 
-  // Find or create auth user (synthetic email)
+  // Find or create auth user (synthetic email keyed by phone)
   const email = `${digits}@phone.duka.app`;
   const password = randomPassword();
 
-  let user = await findUserByEmail(email);
-  if (!user) {
+  let userId = await findUserIdByPhone(digits);
+  if (!userId) {
     const { data: created, error: createErr } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      phone: "+" + digits,
       user_metadata: { phone: digits, login_method: "phone-otp" },
     });
     if (createErr || !created.user) {
       console.error("[verify-otp] createUser:", createErr);
-      return new Response(JSON.stringify({ ok: false, error: "User create failed" }), { status: 500, headers: CORS });
+      return new Response(JSON.stringify({ ok: false, error: "User create failed: " + (createErr?.message ?? "unknown") }), { status: 500, headers: CORS });
     }
-    user = created.user;
+    userId = created.user.id;
+    const { error: mapErr } = await supabase.from("phone_users").insert({ phone: digits, user_id: userId });
+    if (mapErr) console.error("[verify-otp] phone_users insert:", mapErr);
   } else {
-    const { error: updErr } = await supabase.auth.admin.updateUserById(user.id, { password });
+    const { error: updErr } = await supabase.auth.admin.updateUserById(userId, { password });
     if (updErr) {
       console.error("[verify-otp] updateUser:", updErr);
-      return new Response(JSON.stringify({ ok: false, error: "Password rotate failed" }), { status: 500, headers: CORS });
+      return new Response(JSON.stringify({ ok: false, error: "Password rotate failed: " + updErr.message }), { status: 500, headers: CORS });
     }
   }
 
   return new Response(JSON.stringify({ ok: true, email, password }), { headers: CORS });
+};
+
+Deno.serve(async (req) => {
+  try {
+    return await handler(req);
+  } catch (e) {
+    console.error("[verify-otp] unhandled:", e);
+    const msg = e instanceof Error ? e.message : String(e);
+    return new Response(JSON.stringify({ ok: false, error: "Server error: " + msg }), { status: 500, headers: CORS });
+  }
 });

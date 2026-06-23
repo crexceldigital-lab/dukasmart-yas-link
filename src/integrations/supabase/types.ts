@@ -196,6 +196,24 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_users: {
+        Row: {
+          created_at: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          phone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          phone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           buying_price_tzs: number | null
