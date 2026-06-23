@@ -27,86 +27,91 @@ function genOtp(): string {
   return String(100000 + (a[0] % 900000));
 }
 
-async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; error?: string }> {
-  const apiKey = Deno.env.get("AFRICASTALKING_API_KEY");
-  const username = Deno.env.get("AFRICASTALKING_USERNAME") ?? "sandbox";
-  const senderId = Deno.env.get("AFRICASTALKING_SENDER_ID");
-  if (!apiKey) return { ok: false, error: "AFRICASTALKING_API_KEY not set" };
+async function sendAT(phoneE164: string, otp: string, appName?: string | null): Promise<{ ok: boolean; error?: string }> {
+  const apiKey = Deno.env.get("AFRICASTALKING_API_KEY")?.trim();
+  const configuredUsername = Deno.env.get("AFRICASTALKING_USERNAME")?.trim();
+  const senderId = Deno.env.get("AFRICASTALKING_SENDER_ID")?.trim();
+  if (!apiKey) return { ok: false, error: "SMS gateway API key is not configured." };
 
   const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
-
-  // Try the host that matches the username first, then fall back to the other
-  // host on auth failure (handles sandbox-key / live-username mismatches).
   const liveHost = "https://api.africastalking.com";
-  const sandboxHost = "https://api.sandbox.africastalking.com";
-  const primary = username === "sandbox" ? sandboxHost : liveHost;
-  const secondary = username === "sandbox" ? liveHost : sandboxHost;
+  const usernameCandidates = [
+    configuredUsername,
+    appName,
+    appName?.replace(/-/g, "_"),
+    appName?.replace(/[-_\s]/g, ""),
+  ]
+    .map((name) => name?.trim())
+    .filter((name): name is string => Boolean(name && name.toLowerCase() !== "sandbox"));
 
-  const attempt = async (host: string, user: string) => {
+  const usernames = Array.from(new Set(usernameCandidates));
+  if (usernames.length === 0) {
+    return {
+      ok: false,
+      error: "Real SMS is not configured: the SMS gateway is still in sandbox/test mode, which does not deliver OTPs to phones.",
+    };
+  }
+
+  const attempt = async (user: string, includeSender: boolean) => {
     const params = new URLSearchParams({
-      username: user, to: phoneE164, message,
-      ...(senderId ? { from: senderId } : {}),
+      username: user,
+      to: phoneE164,
+      message,
+      ...(includeSender && senderId ? { from: senderId } : {}),
     });
-    const res = await fetch(`${host}/version1/messaging`, {
+    const res = await fetch(`${liveHost}/version1/messaging`, {
       method: "POST",
       headers: { apiKey, "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
       body: params.toString(),
     });
     const text = await res.text();
-    return { status: res.status, ok: res.ok, text, host, user };
+    console.log("[send-otp] live AT attempt user=", user, "sender=", includeSender && Boolean(senderId), "status=", res.status);
+    return { status: res.status, ok: res.ok, text, user };
   };
 
-  // First attempt with configured username
-  let r = await attempt(primary, username);
-  console.log("[send-otp] AT attempt1", r.host, "user=", r.user, "status=", r.status);
+  const parseAttempt = (text: string) => {
+    try {
+      const json = JSON.parse(text) as {
+        SMSMessageData?: { Message?: string; Recipients?: { status?: string; statusCode?: number; cost?: string; messageId?: string }[] };
+      };
+      console.log("[send-otp] live AT response:", text.slice(0, 500));
+      const rec = json?.SMSMessageData?.Recipients?.[0];
+      if (rec?.status === "Success") return { ok: true as const };
+      return { ok: false as const, message: json?.SMSMessageData?.Message ?? rec?.status ?? "no recipient" };
+    } catch {
+      return { ok: false as const, message: `non-JSON: ${text.slice(0, 300)}` };
+    }
+  };
 
-  // On 401, try the other host (key may belong to the other environment)
-  if (r.status === 401) {
-    const r2 = await attempt(secondary, username);
-    console.log("[send-otp] AT attempt2", r2.host, "user=", r2.user, "status=", r2.status);
-    if (r2.ok || r2.status !== 401) r = r2;
-    else {
-      // Final attempt: if username is not "sandbox" but live host rejected,
-      // try sandbox endpoint with the literal "sandbox" username (default app).
-      if (username !== "sandbox") {
-        const r3 = await attempt(sandboxHost, "sandbox");
-        console.log("[send-otp] AT attempt3 sandbox/sandbox status=", r3.status);
-        r = r3;
+  let lastError = "SMS gateway rejected the request.";
+  for (const username of usernames) {
+    const first = await attempt(username, true);
+    if (!first.ok) {
+      lastError = `HTTP ${first.status}: ${first.text.slice(0, 180)}`;
+      continue;
+    }
+
+    const parsed = parseAttempt(first.text);
+    if (parsed.ok) return { ok: true };
+    lastError = parsed.message;
+
+    if (senderId && /InvalidSenderId/i.test(parsed.message)) {
+      console.log("[send-otp] sender ID rejected; retrying live send without sender ID");
+      const retry = await attempt(username, false);
+      if (!retry.ok) {
+        lastError = `HTTP ${retry.status}: ${retry.text.slice(0, 180)}`;
+        continue;
       }
+      const retryParsed = parseAttempt(retry.text);
+      if (retryParsed.ok) return { ok: true };
+      lastError = retryParsed.message;
     }
   }
 
-  if (!r.ok) return { ok: false, error: `AT HTTP ${r.status}: ${r.text.slice(0, 300)}` };
-
-  let json: { SMSMessageData?: { Recipients?: { status?: string; statusCode?: number; cost?: string }[] } };
-  try { json = JSON.parse(r.text); } catch { return { ok: false, error: `AT non-JSON: ${r.text.slice(0, 300)}` }; }
-  console.log("[send-otp] AT raw response:", r.text.slice(0, 500));
-  const rec = json?.SMSMessageData?.Recipients?.[0];
-  if (!rec) {
-    const msg = (json as { SMSMessageData?: { Message?: string } })?.SMSMessageData?.Message ?? "no recipient";
-    // If sender ID is rejected, retry without sender ID (AT uses default short code).
-    if (senderId && /InvalidSenderId/i.test(msg)) {
-      console.log("[send-otp] retrying without sender ID");
-      const params = new URLSearchParams({ username, to: phoneE164, message });
-      const res2 = await fetch(`${primary}/version1/messaging`, {
-        method: "POST",
-        headers: { apiKey, "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
-        body: params.toString(),
-      });
-      const t2 = await res2.text();
-      console.log("[send-otp] retry response:", t2.slice(0, 500));
-      try {
-        const j2 = JSON.parse(t2);
-        const rec2 = j2?.SMSMessageData?.Recipients?.[0];
-        if (rec2?.status === "Success") return { ok: true };
-        const m2 = j2?.SMSMessageData?.Message ?? "no recipient";
-        return { ok: false, error: `AT: ${m2}` };
-      } catch { return { ok: false, error: `AT non-JSON: ${t2.slice(0, 300)}` }; }
-    }
-    return { ok: false, error: `AT: ${msg}` };
-  }
-  if (rec.status !== "Success") return { ok: false, error: `AT recipient status: ${rec.status}` };
-  return { ok: true };
+  const sandboxHint = configuredUsername?.toLowerCase() === "sandbox"
+    ? " The current username is sandbox/test mode, so replace it with the live SMS username/API key for real delivery."
+    : "";
+  return { ok: false, error: `SMS was not delivered by the live gateway: ${lastError}.${sandboxHint}` };
 }
 
 Deno.serve(async (req) => {
@@ -135,7 +140,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: false, error: "DB error" }), { status: 500, headers: CORS });
   }
 
-  const sent = await sendAT(phoneE164, otp);
+  const sent = await sendAT(phoneE164, otp, req.headers.get("x-app-name"));
   if (!sent.ok) {
     console.error("[send-otp] AT:", sent.error);
     return new Response(JSON.stringify({ ok: false, error: sent.error }), { status: 502, headers: CORS });
