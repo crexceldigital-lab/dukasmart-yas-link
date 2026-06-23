@@ -27,30 +27,22 @@ function genOtp(): string {
   return String(100000 + (a[0] % 900000));
 }
 
-async function sendAT(phoneE164: string, otp: string, appName?: string | null): Promise<{ ok: boolean; error?: string }> {
-  const apiKey = Deno.env.get("AFRICASTALKING_API_KEY")?.trim();
-  const configuredUsername = Deno.env.get("AFRICASTALKING_USERNAME")?.trim();
-  const senderId = Deno.env.get("AFRICASTALKING_SENDER_ID")?.trim();
-  if (!apiKey) return { ok: false, error: "SMS gateway API key is not configured." };
+async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; error?: string }> {
+  const apiKey = Deno.env.get("AT_API_KEY")?.trim();
+  const username = Deno.env.get("AT_USERNAME")?.trim();
+  const senderId = Deno.env.get("AT_SENDER_ID")?.trim() || Deno.env.get("AFRICASTALKING_SENDER_ID")?.trim();
 
-  const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
-  const liveHost = "https://api.africastalking.com";
-  const usernameCandidates = [
-    configuredUsername,
-    appName,
-    appName?.replace(/-/g, "_"),
-    appName?.replace(/[-_\s]/g, ""),
-  ]
-    .map((name) => name?.trim())
-    .filter((name): name is string => Boolean(name && name.toLowerCase() !== "sandbox"));
-
-  const usernames = Array.from(new Set(usernameCandidates));
-  if (usernames.length === 0) {
+  if (!username || username.toLowerCase() === "sandbox") {
     return {
       ok: false,
-      error: "Real SMS is not configured: the SMS gateway is still in sandbox/test mode, which does not deliver OTPs to phones.",
+      error: "Real SMS is not configured: set AT_USERNAME to your live Africa's Talking app username, not sandbox.",
     };
   }
+  if (!apiKey) return { ok: false, error: "SMS gateway API key is not configured. Set AT_API_KEY to the API key from the same live Africa's Talking app as AT_USERNAME." };
+
+  const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
+  // Live SMS must use the production API host. Do not change this to api.sandbox.africastalking.com.
+  const liveHost = "https://api.africastalking.com";
 
   const attempt = async (user: string, includeSender: boolean) => {
     const params = new URLSearchParams({
@@ -84,13 +76,10 @@ async function sendAT(phoneE164: string, otp: string, appName?: string | null): 
   };
 
   let lastError = "SMS gateway rejected the request.";
-  for (const username of usernames) {
-    const first = await attempt(username, true);
-    if (!first.ok) {
-      lastError = `HTTP ${first.status}: ${first.text.slice(0, 180)}`;
-      continue;
-    }
-
+  const first = await attempt(username, true);
+  if (!first.ok) {
+    lastError = `HTTP ${first.status}: ${first.text.slice(0, 180)}`;
+  } else {
     const parsed = parseAttempt(first.text);
     if (parsed.ok) return { ok: true };
     lastError = parsed.message;
@@ -100,18 +89,15 @@ async function sendAT(phoneE164: string, otp: string, appName?: string | null): 
       const retry = await attempt(username, false);
       if (!retry.ok) {
         lastError = `HTTP ${retry.status}: ${retry.text.slice(0, 180)}`;
-        continue;
+      } else {
+        const retryParsed = parseAttempt(retry.text);
+        if (retryParsed.ok) return { ok: true };
+        lastError = retryParsed.message;
       }
-      const retryParsed = parseAttempt(retry.text);
-      if (retryParsed.ok) return { ok: true };
-      lastError = retryParsed.message;
     }
   }
 
-  const sandboxHint = configuredUsername?.toLowerCase() === "sandbox"
-    ? " The current username is sandbox/test mode, so replace it with the live SMS username/API key for real delivery."
-    : "";
-  return { ok: false, error: `SMS was not delivered by the live gateway: ${lastError}.${sandboxHint}` };
+  return { ok: false, error: `SMS was not delivered by the live gateway: ${lastError}. Confirm AT_USERNAME and AT_API_KEY are from the same live Africa's Talking app.` };
 }
 
 Deno.serve(async (req) => {
@@ -140,7 +126,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: false, error: "DB error" }), { status: 500, headers: CORS });
   }
 
-  const sent = await sendAT(phoneE164, otp, req.headers.get("x-app-name"));
+  const sent = await sendAT(phoneE164, otp);
   if (!sent.ok) {
     console.error("[send-otp] AT:", sent.error);
     await supabase.from("phone_otps").update({ consumed: true }).eq("phone", digits).eq("code_hash", code_hash);
