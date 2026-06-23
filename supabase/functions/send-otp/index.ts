@@ -143,7 +143,8 @@ Deno.serve(async (req) => {
   const sent = await sendAT(phoneE164, otp, req.headers.get("x-app-name"));
   if (!sent.ok) {
     console.error("[send-otp] AT:", sent.error);
-    return new Response(JSON.stringify({ ok: false, error: sent.error }), { status: 502, headers: CORS });
+    await supabase.from("phone_otps").update({ consumed: true }).eq("phone", digits).eq("code_hash", code_hash);
+    return new Response(JSON.stringify({ ok: false, error: sent.error }), { status: 200, headers: CORS });
   }
 
   return new Response(JSON.stringify({ ok: true }), { headers: CORS });
