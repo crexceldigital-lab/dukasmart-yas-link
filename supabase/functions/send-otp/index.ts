@@ -1,151 +1,93 @@
-// ============================================================
-// DUKA SMART — Send OTP Edge Function
-// Deploy: supabase functions deploy send-otp
-//
-// Secrets to set in Supabase Dashboard > Edge Functions > Secrets:
-//   AT_API_KEY         — Africa's Talking API key
-//   AT_USERNAME        — Africa's Talking username (or 'sandbox')
-//   AT_SENDER_ID       — Your approved sender ID (optional)
-//   OTP_SECRET         — A random secret for signing OTPs (generate one)
-// ============================================================
-
+// DUKA SMART — send-otp (Africa's Talking)
+// Generates a 6-digit code, stores its HMAC hash in phone_otps, sends via AT SMS.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
+};
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-// Simple OTP store in Supabase (we use auth.users magic link as alternative)
-// We store OTPs in a temporary table keyed by phone.
-// The OTP expires in 5 minutes.
-
-async function generateOtp(): Promise<string> {
-  const arr = new Uint32Array(1);
-  crypto.getRandomValues(arr);
-  return String(arr[0] % 900000 + 100000); // 6-digit
+async function hmac(secret: string, msg: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(msg));
+  return btoa(String.fromCharCode(...new Uint8Array(sig)));
 }
 
-async function sendViaSupabaseAuth(phone: string): Promise<{ ok: boolean; error?: string }> {
-  // Use Supabase's built-in OTP (configure SMS provider in Supabase Dashboard)
-  const { error } = await supabase.auth.signInWithOtp({ phone });
-  if (error) return { ok: false, error: error.message };
-  return { ok: true };
+function genOtp(): string {
+  const a = new Uint32Array(1); crypto.getRandomValues(a);
+  return String(100000 + (a[0] % 900000));
 }
 
-async function sendViaAfricasTalking(phone: string, otp: string): Promise<{ ok: boolean; error?: string }> {
-  const apiKey = Deno.env.get("AT_API_KEY");
-  const username = Deno.env.get("AT_USERNAME") ?? "sandbox";
-  const senderId = Deno.env.get("AT_SENDER_ID");
+async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; error?: string }> {
+  const apiKey = Deno.env.get("AFRICASTALKING_API_KEY");
+  const username = Deno.env.get("AFRICASTALKING_USERNAME") ?? "sandbox";
+  const senderId = Deno.env.get("AFRICASTALKING_SENDER_ID");
+  if (!apiKey) return { ok: false, error: "AFRICASTALKING_API_KEY not set" };
 
-  if (!apiKey) return { ok: false, error: "AT_API_KEY not configured" };
-
-  const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimbie mtu. Muda: dakika 5.`;
-
+  const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
   const params = new URLSearchParams({
-    username,
-    to: phone,
-    message,
+    username, to: phoneE164, message,
     ...(senderId ? { from: senderId } : {}),
   });
 
-  const res = await fetch("https://api.africastalking.com/version1/messaging", {
+  const host = username === "sandbox"
+    ? "https://api.sandbox.africastalking.com"
+    : "https://api.africastalking.com";
+
+  const res = await fetch(`${host}/version1/messaging`, {
     method: "POST",
-    headers: {
-      "apiKey": apiKey,
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Accept": "application/json",
-    },
+    headers: { apiKey, "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
     body: params.toString(),
   });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    return { ok: false, error: txt };
-  }
-
-  const json = await res.json();
-  const recipient = json?.SMSMessageData?.Recipients?.[0];
-  if (recipient?.status !== "Success") {
-    return { ok: false, error: recipient?.status ?? "Unknown AT error" };
-  }
-
+  const text = await res.text();
+  if (!res.ok) return { ok: false, error: `AT HTTP ${res.status}: ${text}` };
+  let json: { SMSMessageData?: { Recipients?: { status?: string; statusCode?: number }[] } };
+  try { json = JSON.parse(text); } catch { return { ok: false, error: `AT non-JSON: ${text}` }; }
+  const r = json?.SMSMessageData?.Recipients?.[0];
+  if (!r || r.status !== "Success") return { ok: false, error: r?.status ?? "AT send failed" };
   return { ok: true };
 }
 
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-      },
-    });
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: CORS });
+
+  let body: { phone?: string };
+  try { body = await req.json(); } catch { return new Response(JSON.stringify({ ok: false, error: "Bad JSON" }), { status: 400, headers: CORS }); }
+
+  const digits = (body.phone ?? "").replace(/\D/g, "");
+  if (digits.length < 10) {
+    return new Response(JSON.stringify({ ok: false, error: "Invalid phone" }), { status: 400, headers: CORS });
+  }
+  const phoneE164 = "+" + digits;
+
+  const otp = genOtp();
+  const secret = Deno.env.get("OTP_SECRET") ?? "fallback-secret";
+  const code_hash = await hmac(secret, otp + ":" + digits);
+  const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+  // Invalidate previous unconsumed OTPs for this phone, then insert new one.
+  await supabase.from("phone_otps").update({ consumed: true }).eq("phone", digits).eq("consumed", false);
+  const { error: insErr } = await supabase.from("phone_otps").insert({ phone: digits, code_hash, expires_at });
+  if (insErr) {
+    console.error("[send-otp] db insert:", insErr);
+    return new Response(JSON.stringify({ ok: false, error: "DB error" }), { status: 500, headers: CORS });
   }
 
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405 });
-
-  let body: { phone?: string; action?: "send" | "verify"; otp?: string };
-  try { body = await req.json(); } catch { return new Response("Bad JSON", { status: 400 }); }
-
-  const phone = (body.phone ?? "").replace(/\D/g, "");
-  if (!phone || phone.length < 10) {
-    return new Response(JSON.stringify({ ok: false, error: "Invalid phone" }), {
-      status: 400, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
+  const sent = await sendAT(phoneE164, otp);
+  if (!sent.ok) {
+    console.error("[send-otp] AT:", sent.error);
+    return new Response(JSON.stringify({ ok: false, error: sent.error }), { status: 502, headers: CORS });
   }
 
-  // ACTION: send
-  if (!body.action || body.action === "send") {
-    // Try Supabase built-in auth OTP first (needs SMS provider configured)
-    const atKey = Deno.env.get("AT_API_KEY");
-
-    if (atKey) {
-      // Africa's Talking path — we generate our own OTP and store hash
-      const otp = await generateOtp();
-      const secret = Deno.env.get("OTP_SECRET") ?? "default-secret-change-me";
-      const encoder = new TextEncoder();
-      const keyData = encoder.encode(secret);
-      const otpData = encoder.encode(otp + phone);
-      const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-      const sig = await crypto.subtle.sign("HMAC", cryptoKey, otpData);
-      const hash = btoa(String.fromCharCode(...new Uint8Array(sig)));
-
-      // Store OTP hash in a temp cache using Supabase KV (staff_sessions table as a hack-free alternative)
-      // We store in a dedicated otp_cache table if it exists, otherwise fall back to a simple hash check
-      // For simplicity, we store hash+expiry in a JSON column of a light cache table.
-      // This avoids needing a Redis instance.
-      const expiry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-      await supabase.from("otp_cache").upsert(
-        { phone, hash, expires_at: expiry },
-        { onConflict: "phone" }
-      ).throwOnError().catch(() => {
-        // otp_cache table may not exist yet — Supabase auth OTP fallback
-      });
-
-      const result = await sendViaAfricasTalking("+" + phone, otp);
-      if (!result.ok) {
-        console.error("[otp] AT send failed:", result.error);
-        return new Response(JSON.stringify({ ok: false, error: result.error }), {
-          status: 500, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-        });
-      }
-    } else {
-      // Supabase built-in OTP (configure Twilio/MessageBird in Supabase Dashboard)
-      const result = await sendViaSupabaseAuth("+" + phone);
-      if (!result.ok) {
-        return new Response(JSON.stringify({ ok: false, error: result.error }), {
-          status: 500, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-        });
-      }
-    }
-
-    return new Response(JSON.stringify({ ok: true }), {
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
-  }
-
-  return new Response(JSON.stringify({ ok: false, error: "Unknown action" }), {
-    status: 400, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-  });
+  return new Response(JSON.stringify({ ok: true }), { headers: CORS });
 });

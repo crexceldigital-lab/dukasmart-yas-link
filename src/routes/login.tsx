@@ -37,8 +37,9 @@ function LoginPage() {
     if(n.length<12){ toast(t("Weka nambari sahihi ya simu","Enter a valid phone number")); return; }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ phone:"+"+n });
-      if(error)throw error;
+      const { data, error } = await supabase.functions.invoke("send-otp", { body: { phone: n } });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error ?? "Send failed");
       setStep(2); setCountdown(60); setOtp(Array(6).fill(""));
       setTimeout(()=>refs.current[0]?.focus(),100);
     } catch(e:unknown) {
@@ -50,10 +51,14 @@ function LoginPage() {
     if(code.length!==6)return;
     setBusy(true);
     try {
-      const { data,error } = await supabase.auth.verifyOtp({ phone:"+"+normalizePhone(phone), token:code, type:"sms" });
-      if(error)throw error;
-      if(!data.user)throw new Error("No user");
-      const { data:existing } = await supabase.from("merchants").select("id").eq("user_id",data.user.id).single();
+      const n = normalizePhone(phone);
+      const { data: vr, error: vErr } = await supabase.functions.invoke("verify-otp", { body: { phone: n, code } });
+      if (vErr) throw vErr;
+      if (!vr?.ok) throw new Error(vr?.error ?? "Invalid code");
+      const { data: signIn, error: signErr } = await supabase.auth.signInWithPassword({ email: vr.email, password: vr.password });
+      if (signErr) throw signErr;
+      if (!signIn.user) throw new Error("No user");
+      const { data:existing } = await supabase.from("merchants").select("id").eq("user_id",signIn.user.id).single();
       if(!existing){ setStep(3); }
       else { toast(t("Karibu tena!","Welcome back!")); navigate({ to:"/" }); }
     } catch(e:unknown) {
