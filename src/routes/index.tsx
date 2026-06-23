@@ -10,6 +10,8 @@ import { useI18n } from "@/lib/duka/i18n";
 import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Sparkles, Users, TrendingUp, Wallet } from "lucide-react";
 import { useProGate } from "@/lib/duka/useProGate";
 import { ProLockOverlay } from "@/components/duka/ProLockOverlay";
+import { useRealtime } from "@/lib/duka/useRealtime";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -20,7 +22,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const { merchant, products, transactions, rewards, stats, customers, finance } = useDuka();
+  const { merchant, products, transactions, rewards, stats, customers, finance, refreshAll } = useDuka();
+  useRealtime({
+    merchantId: merchant?.merchantId,
+    onTransactionUpdated: (tx) => {
+      if (tx.status === "confirmed") {
+        toast(`💰 Malipo ya ${formatTZS(tx.amount as number)} yamefika!`);
+        refreshAll();
+      }
+    },
+    onProductUpdated: () => refreshAll(),
+  });
   const { t, lang } = useI18n();
   const { isPro } = useProGate();
   const [open, setOpen] = useState(false);
