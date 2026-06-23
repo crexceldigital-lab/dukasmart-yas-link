@@ -84,6 +84,25 @@ async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; er
   const rec = json?.SMSMessageData?.Recipients?.[0];
   if (!rec) {
     const msg = (json as { SMSMessageData?: { Message?: string } })?.SMSMessageData?.Message ?? "no recipient";
+    // If sender ID is rejected, retry without sender ID (AT uses default short code).
+    if (senderId && /InvalidSenderId/i.test(msg)) {
+      console.log("[send-otp] retrying without sender ID");
+      const params = new URLSearchParams({ username, to: phoneE164, message });
+      const res2 = await fetch(`${primary}/version1/messaging`, {
+        method: "POST",
+        headers: { apiKey, "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+        body: params.toString(),
+      });
+      const t2 = await res2.text();
+      console.log("[send-otp] retry response:", t2.slice(0, 500));
+      try {
+        const j2 = JSON.parse(t2);
+        const rec2 = j2?.SMSMessageData?.Recipients?.[0];
+        if (rec2?.status === "Success") return { ok: true };
+        const m2 = j2?.SMSMessageData?.Message ?? "no recipient";
+        return { ok: false, error: `AT: ${m2}` };
+      } catch { return { ok: false, error: `AT non-JSON: ${t2.slice(0, 300)}` }; }
+    }
     return { ok: false, error: `AT: ${msg}` };
   }
   if (rec.status !== "Success") return { ok: false, error: `AT recipient status: ${rec.status}` };
