@@ -68,14 +68,12 @@ function PayPage() {
 
     pollRef.current = setInterval(async () => {
       pollCount.current++;
-      const { data } = await supabase
-        .from("transactions")
-        .select("status")
-        .eq("id", txId)
-        .single();
-
-      if (data?.status === "confirmed") { clearInterval(pollRef.current!); setStep("success"); }
-      if (data?.status === "failed") { clearInterval(pollRef.current!); setStep("failed"); }
+      const { data } = await supabase.functions.invoke("check-payment-status", {
+        body: { transactionId: txId },
+      });
+      const status = (data as { ok?: boolean; status?: string } | null)?.status;
+      if (status === "confirmed") { clearInterval(pollRef.current!); setStep("success"); }
+      if (status === "failed") { clearInterval(pollRef.current!); setStep("failed"); }
 
       // Timeout after 3 minutes
       if (pollCount.current > 60) {
