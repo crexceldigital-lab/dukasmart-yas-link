@@ -80,7 +80,8 @@ function LoginPage() {
       });
       if(error)throw error;
       toast(t("Karibu DUKA SMART! 🎉","Welcome to DUKA SMART! 🎉"));
-      navigate({ to:"/" });
+      // Hard reload so the store re-initialises with the newly created merchant row.
+      window.location.href = "/";
     } catch(e:unknown) {
       toast(t("Imeshindikana","Failed: ")+(e instanceof Error?e.message:""));
     } finally { setBusy(false); }
