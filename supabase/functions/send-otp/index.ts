@@ -34,26 +34,55 @@ async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; er
   if (!apiKey) return { ok: false, error: "AFRICASTALKING_API_KEY not set" };
 
   const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
-  const params = new URLSearchParams({
-    username, to: phoneE164, message,
-    ...(senderId ? { from: senderId } : {}),
-  });
 
-  const host = username === "sandbox"
-    ? "https://api.sandbox.africastalking.com"
-    : "https://api.africastalking.com";
+  // Try the host that matches the username first, then fall back to the other
+  // host on auth failure (handles sandbox-key / live-username mismatches).
+  const liveHost = "https://api.africastalking.com";
+  const sandboxHost = "https://api.sandbox.africastalking.com";
+  const primary = username === "sandbox" ? sandboxHost : liveHost;
+  const secondary = username === "sandbox" ? liveHost : sandboxHost;
 
-  const res = await fetch(`${host}/version1/messaging`, {
-    method: "POST",
-    headers: { apiKey, "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
-    body: params.toString(),
-  });
-  const text = await res.text();
-  if (!res.ok) return { ok: false, error: `AT HTTP ${res.status}: ${text}` };
-  let json: { SMSMessageData?: { Recipients?: { status?: string; statusCode?: number }[] } };
-  try { json = JSON.parse(text); } catch { return { ok: false, error: `AT non-JSON: ${text}` }; }
-  const r = json?.SMSMessageData?.Recipients?.[0];
-  if (!r || r.status !== "Success") return { ok: false, error: r?.status ?? "AT send failed" };
+  const attempt = async (host: string, user: string) => {
+    const params = new URLSearchParams({
+      username: user, to: phoneE164, message,
+      ...(senderId ? { from: senderId } : {}),
+    });
+    const res = await fetch(`${host}/version1/messaging`, {
+      method: "POST",
+      headers: { apiKey, "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+      body: params.toString(),
+    });
+    const text = await res.text();
+    return { status: res.status, ok: res.ok, text, host, user };
+  };
+
+  // First attempt with configured username
+  let r = await attempt(primary, username);
+  console.log("[send-otp] AT attempt1", r.host, "user=", r.user, "status=", r.status);
+
+  // On 401, try the other host (key may belong to the other environment)
+  if (r.status === 401) {
+    const r2 = await attempt(secondary, username);
+    console.log("[send-otp] AT attempt2", r2.host, "user=", r2.user, "status=", r2.status);
+    if (r2.ok || r2.status !== 401) r = r2;
+    else {
+      // Final attempt: if username is not "sandbox" but live host rejected,
+      // try sandbox endpoint with the literal "sandbox" username (default app).
+      if (username !== "sandbox") {
+        const r3 = await attempt(sandboxHost, "sandbox");
+        console.log("[send-otp] AT attempt3 sandbox/sandbox status=", r3.status);
+        r = r3;
+      }
+    }
+  }
+
+  if (!r.ok) return { ok: false, error: `AT HTTP ${r.status}: ${r.text.slice(0, 300)}` };
+
+  let json: { SMSMessageData?: { Recipients?: { status?: string; statusCode?: number; cost?: string }[] } };
+  try { json = JSON.parse(r.text); } catch { return { ok: false, error: `AT non-JSON: ${r.text.slice(0, 300)}` }; }
+  const rec = json?.SMSMessageData?.Recipients?.[0];
+  if (!rec) return { ok: false, error: "AT returned no recipient — check Sender ID approval and credit balance" };
+  if (rec.status !== "Success") return { ok: false, error: `AT recipient status: ${rec.status}` };
   return { ok: true };
 }
 
