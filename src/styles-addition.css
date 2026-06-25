@@ -1,0 +1,68 @@
+/* Dashboard entrance: cards fade up in sequence on load. Apply dy-stagger
+   to a wrapper and give each direct child an index via --dy-i (0,1,2,...);
+   delay = base + i * step, capped so a long list doesn't crawl in forever. */
+@keyframes dy-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dy-stagger > * {
+  opacity: 0;
+  animation: dy-fade-up .45s cubic-bezier(.2,.8,.2,1) forwards;
+  animation-delay: calc(80ms + var(--dy-i, 0) * 70ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dy-stagger > * { animation: none; opacity: 1; }
+}
+
+/* Row highlight for a transaction that just arrived via realtime —
+   briefly tinted, fades back to normal over ~2.4s. Re-add the class
+   (e.g. via a key remount) whenever a new tx should flash again. */
+@keyframes dy-row-settle {
+  0%   { background: rgba(255,209,0,0.22); }
+  100% { background: rgba(255,209,0,0); }
+}
+.dy-row-new {
+  animation: dy-row-settle 2.4s ease-out forwards;
+  border-radius: 10px;
+  margin: 0 -8px;
+  padding: 6px 8px !important;
+}
+
+/* Payment toast: bigger and more celebratory than the standard dy-toast,
+   reserved specifically for confirmed-payment realtime events. */
+.dy-toast-payment {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%) scale(0.92);
+  background: linear-gradient(135deg, #123274, #0E7C53);
+  color: #fff; padding: 12px 20px; border-radius: 16px;
+  font-size: 13.5px; font-weight: 700; z-index: 90;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 12px 28px rgba(18,50,116,0.35);
+  animation: dy-toast-in .35s cubic-bezier(.2,.8,.2,1) forwards;
+  max-width: calc(100vw - 32px);
+}
+@keyframes dy-toast-in {
+  from { opacity: 0; transform: translateX(-50%) scale(0.92) translateY(-6px); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+.dy-toast-payment.dy-toast-out {
+  animation: dy-toast-out .3s ease forwards;
+}
+@keyframes dy-toast-out {
+  from { opacity: 1; transform: translateX(-50%) scale(1); }
+  to   { opacity: 0; transform: translateX(-50%) scale(0.95) translateY(-4px); }
+}
+.dy-toast-payment .dy-toast-icon {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255,209,0,0.25); color: #FFD100;
+  display: grid; place-items: center; flex-shrink: 0;
+}
+
+/* Small live pulse dot — used next to the dashboard greeting to suggest
+   the numbers below are live/realtime, not a static snapshot. */
+@keyframes dy-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.dy-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4ADE80; display: inline-block;
+  animation: dy-pulse 1.6s ease infinite;
+}
+

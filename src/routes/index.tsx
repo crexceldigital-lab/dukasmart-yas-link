@@ -11,7 +11,9 @@ import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight,
 import { useProGate } from "@/lib/duka/useProGate";
 import { ProLockOverlay } from "@/components/duka/ProLockOverlay";
 import { useRealtime } from "@/lib/duka/useRealtime";
-import { toast } from "sonner";
+import { useCountUp } from "@/lib/duka/useCountUp";
+import { CreditRing } from "@/components/duka/CreditRing";
+import { PaymentToast } from "@/components/duka/PaymentToast";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -23,11 +25,14 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const { merchant, products, transactions, rewards, stats, customers, finance, refreshAll } = useDuka();
+  const [paymentToast, setPaymentToast] = useState<string | null>(null);
+  const [justArrivedTxId, setJustArrivedTxId] = useState<string | null>(null);
   useRealtime({
     merchantId: merchant?.merchantId,
     onTransactionUpdated: (tx) => {
       if (tx.status === "confirmed") {
-        toast(`💰 Malipo ya ${formatTZS(tx.amount as number)} yamefika!`);
+        setPaymentToast(formatTZS(tx.amount as number));
+        setJustArrivedTxId(tx.id as string);
         refreshAll();
       }
     },
@@ -36,6 +41,8 @@ function Dashboard() {
   const { t, lang } = useI18n();
   const { isPro } = useProGate();
   const [open, setOpen] = useState(false);
+  const animatedToday = useCountUp(stats.today.total);
+  const animatedWeek = useCountUp(stats.week.total);
   if (!merchant) return null;
   const tier = getTier(merchant.creditScore);
 
@@ -83,13 +90,18 @@ function Dashboard() {
       <Topbar
         title={merchant.businessName}
         subtitle={`${merchant.dukaId} • ${merchant.city}`}
-        right={<span className="dy-pill" style={{ background: "rgba(0,168,107,0.2)", color: "#fff", border: `1px solid ${tier.color}` }}>{lang === "en" ? tier.english : tier.swahili}</span>}
+        right={
+          <span className="dy-pill" style={{ background: "rgba(0,168,107,0.2)", color: "#fff", border: `1px solid ${tier.color}` }}>
+            <span className="dy-live-dot" style={{ marginRight: 1 }} />
+            {lang === "en" ? tier.english : tier.swahili}
+          </span>
+        }
       />
-      <div style={{ padding: 16, display: "grid", gap: 14 }}>
-        <div className="dy-hero">
+      <div className="dy-stagger" style={{ padding: 16, display: "grid", gap: 14 }}>
+        <div className="dy-hero" style={{ "--dy-i": 0 } as React.CSSProperties}>
           <div style={{ fontSize: 13, opacity: 0.85 }}>{getGreeting()}, {merchant.businessName.split(" ")[0]}</div>
           <div style={{ fontSize: 13, opacity: 0.7, marginTop: 6 }}>{t("Mauzo ya leo", "Today's sales")}</div>
-          <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.02em", marginTop: 2 }}>{formatTZS(stats.today.total)}</div>
+          <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.02em", marginTop: 2 }}>{formatTZS(animatedToday)}</div>
           <div style={{ fontSize: 12.5, opacity: 0.8 }}>{stats.today.count} {t("miamala leo", "transactions today")}</div>
           <button className="dy-btn dy-btn-primary" style={{ marginTop: 14, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }} onClick={() => setOpen(true)}>
             <Zap size={16} strokeWidth={2.5} />
@@ -97,19 +109,21 @@ function Dashboard() {
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <StatCard label={t("Wiki Hii", "This Week")} value={formatTZS(stats.week.total)} sub={`${stats.week.count} ${t("miamala", "txns")}`} accent="var(--dy-green)" />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, "--dy-i": 1 } as React.CSSProperties}>
+          <StatCard label={t("Wiki Hii", "This Week")} value={formatTZS(animatedWeek)} sub={`${stats.week.count} ${t("miamala", "txns")}`} accent="var(--dy-green)" />
           <StatCard label={t("Mwezi Huu", "This Month")} value={formatTZS(stats.month.total)} sub={`${stats.month.count} ${t("miamala", "txns")}`} />
           <StatCard label={t("Jumla Yote", "All Time")} value={formatTZS(stats.allTime.total)} sub={`${stats.allTime.count} ${t("miamala", "txns")}`} />
-          <div className="dy-card" style={{ background: "linear-gradient(135deg, #123274, #1B49A6)", color: "#fff", border: "none" }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, opacity: 0.8, textTransform: "uppercase", letterSpacing: ".06em" }}>{t("Afya ya Biashara", "Business Health")}</div>
-            <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>{merchant.creditScore}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD100", marginTop: 2 }}>{lang === "en" ? tier.english : tier.swahili}</div>
+          <div className="dy-card" style={{ background: "linear-gradient(135deg, #123274, #1B49A6)", color: "#fff", border: "none", display: "flex", alignItems: "center", gap: 10 }}>
+            <CreditRing score={merchant.creditScore} size={52} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 600, opacity: 0.8, textTransform: "uppercase", letterSpacing: ".05em" }}>{t("Afya ya Biashara", "Business Health")}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD100", marginTop: 2 }}>{lang === "en" ? tier.english : tier.swahili}</div>
+            </div>
           </div>
         </div>
 
         {top.length > 0 && (
-          <section className="dy-card">
+          <section className="dy-card" style={{ "--dy-i": 2 } as React.CSSProperties}>
             <h3 style={sectionTitle}><Star size={14} strokeWidth={2.5} style={iconInline} /> {t("Bidhaa Zinazouza", "Top Products")}</h3>
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {top.map((p, i) => (
@@ -126,8 +140,11 @@ function Dashboard() {
           </section>
         )}
 
-        {isPro ? customerCard : <ProLockOverlay message={t("Pandisha kuona wateja wako", "Upgrade to see your customers")}>{customerCard}</ProLockOverlay>}
+        <div style={{ "--dy-i": 3 } as React.CSSProperties}>
+          {isPro ? customerCard : <ProLockOverlay message={t("Pandisha kuona wateja wako", "Upgrade to see your customers")}>{customerCard}</ProLockOverlay>}
+        </div>
 
+        <div style={{ "--dy-i": 4 } as React.CSSProperties}>
         {(() => {
           const profitCard = (
             <section className="dy-card" style={{ background: "linear-gradient(135deg, rgba(0,168,107,0.08), rgba(0,168,107,0.02))", border: "1px solid rgba(0,168,107,0.25)" }}>
@@ -147,11 +164,12 @@ function Dashboard() {
           );
           return isPro ? profitCard : <ProLockOverlay message={t("Pandisha kuona faida yako", "Upgrade to see your profit")}>{profitCard}</ProLockOverlay>;
         })()}
+        </div>
 
         <Link
           to="/matumizi"
           className="dy-card"
-          style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 12 }}
+          style={{ "--dy-i": 5, textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 12 } as React.CSSProperties}
         >
           <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(231,76,60,0.12)", color: "var(--dy-red)", display: "grid", placeItems: "center", flexShrink: 0 }}>
             <Wallet size={20} strokeWidth={2.5} />
@@ -169,7 +187,7 @@ function Dashboard() {
         </Link>
 
         {rewards.length > 0 && (
-          <section className="dy-card">
+          <section className="dy-card" style={{ "--dy-i": 6 } as React.CSSProperties}>
             <h3 style={sectionTitle}><Gift size={14} strokeWidth={2.5} style={iconInline} /> {t("Zawadi za YAS", "YAS Rewards")}</h3>
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
               {rewards.map(r => (
@@ -185,7 +203,7 @@ function Dashboard() {
           </section>
         )}
 
-        <section className="dy-card">
+        <section className="dy-card" style={{ "--dy-i": 7 } as React.CSSProperties}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={sectionTitle}>{t("Miamala ya Hivi Karibuni", "Recent Transactions")}</h3>
             <Link to="/mauzo" style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-navy)", display: "inline-flex", alignItems: "center", gap: 4 }}>{t("Yote", "All")} <ArrowRight size={12} strokeWidth={2.5} /></Link>
@@ -201,17 +219,18 @@ function Dashboard() {
             </div>
           ) : (
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-              {recent.map(t => {
-                const Icon = t.status === "confirmed" ? CheckCircle2 : t.status === "pending" ? Clock : XCircle;
-                const iconColor = t.status === "confirmed" ? "var(--dy-green)" : t.status === "pending" ? "var(--dy-yellow)" : "var(--dy-red)";
+              {recent.map(tx => {
+                const Icon = tx.status === "confirmed" ? CheckCircle2 : tx.status === "pending" ? Clock : XCircle;
+                const iconColor = tx.status === "confirmed" ? "var(--dy-green)" : tx.status === "pending" ? "var(--dy-yellow)" : "var(--dy-red)";
+                const isNew = tx.id === justArrivedTxId;
                 return (
-                  <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div key={tx.id} className={isNew ? "dy-row-new" : undefined} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <Icon size={18} strokeWidth={2.5} color={iconColor} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.productName}</div>
-                      <div style={{ fontSize: 11.5, color: "var(--dy-muted)" }}>{formatDate(t.createdAt)}</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tx.productName}</div>
+                      <div style={{ fontSize: 11.5, color: "var(--dy-muted)" }}>{formatDate(tx.createdAt)}</div>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: "var(--dy-green)" }}>{formatTZS(t.amount)}</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "var(--dy-green)" }}>{formatTZS(tx.amount)}</div>
                   </div>
                 );
               })}
@@ -221,6 +240,13 @@ function Dashboard() {
       </div>
 
       <PaymentLinkModal open={open} onClose={() => setOpen(false)} />
+
+      {paymentToast && (
+        <PaymentToast
+          message={t(`Malipo ya ${paymentToast} yamefika!`, `Payment of ${paymentToast} received!`)}
+          onDone={() => setPaymentToast(null)}
+        />
+      )}
 
       <Link
         to="/msaidizi"
