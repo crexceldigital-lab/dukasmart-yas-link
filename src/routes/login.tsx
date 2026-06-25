@@ -138,7 +138,7 @@ function LoginPage() {
     }}>
       <YasLogo size={64} />
       <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: "0.02em", textAlign: "center" }}>
-        DUKA <span style={{ color: "#FFD100" }}>SMART</span>
+        POKEA
       </div>
 
       <div style={{
