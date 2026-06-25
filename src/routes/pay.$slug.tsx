@@ -35,7 +35,7 @@ function PayPage() {
   const [link, setLink] = useState<LinkInfo | null>(null);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [provider, setProvider] = useState<"mixx" | "mpesa">("mixx");
+  const [provider] = useState<"mixx">("mixx");
   const [txId, setTxId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -188,7 +188,7 @@ function PayPage() {
         <h2 style={{ fontWeight: 900, color: "var(--dy-navy)", fontSize: 20 }}>Angalia Simu Yako</h2>
         <p style={{ color: "var(--dy-text)", fontSize: 14, lineHeight: 1.6 }}>
           Ombi la malipo la <b>{formatTZS(link?.amount ?? 0)}</b> limetumwa kwa <b>+255 {phone}</b>.
-          <br />Ingiza PIN yako ya {provider === "mixx" ? "Mixx" : "M-Pesa"} kuthibitisha.
+          <br />Ingiza PIN yako ya Mixx kuthibitisha.
         </p>
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
           {[0, 1, 2].map(i => (
@@ -286,21 +286,15 @@ function PayPage() {
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-muted)" }}>Lipa kwa</label>
             <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-              {(["mixx", "mpesa"] as const).map(p => (
-                <button
-                  key={p}
-                  onClick={() => setProvider(p)}
-                  style={{
-                    flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13, fontWeight: 700,
-                    border: "2px solid " + (provider === p ? "var(--dy-navy)" : "var(--dy-border)"),
-                    background: provider === p ? "var(--dy-navy)" : "var(--dy-surface)",
-                    color: provider === p ? "#fff" : "var(--dy-text)",
-                    cursor: "pointer", transition: "all 150ms ease",
-                  }}
-                >
-                  {p === "mixx" ? "💳 Mixx by YAS" : "📱 M-Pesa"}
-                </button>
-              ))}
+              <div
+                style={{
+                  flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13, fontWeight: 700,
+                  border: "2px solid var(--dy-navy)", background: "var(--dy-navy)",
+                  color: "#fff", textAlign: "center",
+                }}
+              >
+                💳 Mixx by YAS
+              </div>
             </div>
           </div>
 
