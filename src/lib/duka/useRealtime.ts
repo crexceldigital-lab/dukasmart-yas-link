@@ -1,5 +1,5 @@
 // ============================================================
-// DUKA SMART — useRealtime Hook
+// POKEA — useRealtime Hook
 // Add to: src/lib/duka/useRealtime.ts
 //
 // Subscribes to live database changes so the merchant's

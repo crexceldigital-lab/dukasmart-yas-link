@@ -10,10 +10,10 @@ export function YasLogo({ size = 36, className }: { size?: number; className?: s
   );
 }
 
-export function DukaSmartWordmark({ size = 18, color = "#fff", accent = "#FFD100" }: { size?: number; color?: string; accent?: string }) {
+export function PokeaWordmark({ size = 18, color = "#fff", accent = "#FFD100" }: { size?: number; color?: string; accent?: string }) {
   return (
     <span style={{ fontSize: size, fontWeight: 900, letterSpacing: "0.04em", lineHeight: 1, color, whiteSpace: "nowrap" }}>
-      DUKA <span style={{ color: accent }}>SMART</span>
+      <span style={{ color: accent }}>POKEA</span>
     </span>
   );
 }
@@ -22,7 +22,7 @@ export function YasLockup({ logoSize = 28, textSize = 16, color = "#fff" }: { lo
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
       <YasLogo size={logoSize} />
-      <DukaSmartWordmark size={textSize} color={color} />
+      <PokeaWordmark size={textSize} color={color} />
     </span>
   );
 }

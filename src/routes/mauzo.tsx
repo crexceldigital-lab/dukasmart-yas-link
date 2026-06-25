@@ -8,7 +8,7 @@ import { useI18n } from "@/lib/duka/i18n";
 import { Inbox, Check, Clock, X } from "lucide-react";
 
 export const Route = createFileRoute("/mauzo")({
-  head: () => ({ meta: [{ title: "Mauzo — DUKA SMART" }, { name: "description", content: "Historia kamili ya mauzo yako." }] }),
+  head: () => ({ meta: [{ title: "Mauzo — POKEA" }, { name: "description", content: "Historia kamili ya mauzo yako." }] }),
   component: () => (<AuthGuard><Shell><Mauzo /></Shell></AuthGuard>),
 });
 

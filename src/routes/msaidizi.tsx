@@ -12,8 +12,8 @@ import { MsaidiziMarkFilled } from "@/components/duka/MsaidiziMark";
 
 export const Route = createFileRoute("/msaidizi")({
   head: () => ({ meta: [
-    { title: "Msaidizi — DUKA SMART" },
-    { name: "description", content: "Msaidizi wako wa AI wa Duka Smart — mwenendo wa mauzo na ujumbe wa matangazo." },
+    { title: "Msaidizi — POKEA" },
+    { name: "description", content: "Msaidizi wako wa AI wa Pokea — mwenendo wa mauzo na ujumbe wa matangazo." },
   ] }),
   component: () => (<AuthGuard><Shell><MsaidiziPage /></Shell></AuthGuard>),
 });
@@ -80,8 +80,8 @@ function MsaidiziPage() {
 
   const firstName = merchant.businessName.split(" ")[0];
   const greeting = lang === "en"
-    ? `Hi ${merchant.businessName}! I'm your DUKA SMART Assistant. I'm here to show you your sales trends and help you write promotional messages. Ask me anything!`
-    : `Habari, ${merchant.businessName}! Mimi ni Msaidizi wako wa DUKA SMART. Niko hapa kukuonyesha mwenendo wa mauzo yako na kukusaidia kuandika ujumbe wa matangazo. Niulize chochote!`;
+    ? `Hi ${merchant.businessName}! I'm your POKEA Assistant. I'm here to show you your sales trends and help you write promotional messages. Ask me anything!`
+    : `Habari, ${merchant.businessName}! Mimi ni Msaidizi wako wa POKEA. Niko hapa kukuonyesha mwenendo wa mauzo yako na kukusaidia kuandika ujumbe wa matangazo. Niulize chochote!`;
 
   const chips = lang === "en" ? [
     "My sales this week?",

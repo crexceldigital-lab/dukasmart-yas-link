@@ -1,5 +1,5 @@
 // ============================================================
-// DUKA SMART — Initiate Payment Edge Function
+// POKEA — Initiate Payment Edge Function
 // Deploy: supabase functions deploy initiate-payment
 //
 // Called by the public pay page when a buyer taps "Lipa Sasa".

@@ -8,7 +8,7 @@ import { useI18n } from "@/lib/duka/i18n";
 import { Lightbulb, ChevronLeft, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/afya")({
-  head: () => ({ meta: [{ title: "Afya ya Biashara — DUKA SMART" }, { name: "description", content: "Tazama kiwango chako cha mkopo na jinsi ya kukikuza." }] }),
+  head: () => ({ meta: [{ title: "Afya ya Biashara — POKEA" }, { name: "description", content: "Tazama kiwango chako cha mkopo na jinsi ya kukikuza." }] }),
   component: () => (<AuthGuard><Shell><Afya /></Shell></AuthGuard>),
 });
 

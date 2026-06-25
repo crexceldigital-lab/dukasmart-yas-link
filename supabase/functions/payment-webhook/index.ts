@@ -1,5 +1,5 @@
 // ============================================================
-// DUKA SMART — Payment Webhook Edge Function
+// POKEA — Payment Webhook Edge Function
 // Deploy: supabase functions deploy payment-webhook
 //
 // This single handler supports multiple payment providers.

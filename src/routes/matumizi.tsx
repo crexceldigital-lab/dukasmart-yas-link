@@ -11,7 +11,7 @@ import { useProGate } from "@/lib/duka/useProGate";
 import { Wallet, Plus, Trash2, Lock, Sparkles, Home as HomeIcon, Truck, Package, Users as UsersIcon, Zap, MoreHorizontal, TrendingUp, TrendingDown, Save } from "lucide-react";
 
 export const Route = createFileRoute("/matumizi")({
-  head: () => ({ meta: [{ title: "Matumizi — DUKA SMART" }, { name: "description", content: "Fuatilia matumizi ya biashara yako." }] }),
+  head: () => ({ meta: [{ title: "Matumizi — POKEA" }, { name: "description", content: "Fuatilia matumizi ya biashara yako." }] }),
   component: () => (<AuthGuard><Shell><Matumizi /></Shell></AuthGuard>),
 });
 

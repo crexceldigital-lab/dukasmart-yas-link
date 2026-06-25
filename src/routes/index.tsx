@@ -18,7 +18,7 @@ import { MsaidiziMarkFilled } from "@/components/duka/MsaidiziMark";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Nyumbani — DUKA SMART" },
+    { title: "Nyumbani — POKEA" },
     { name: "description", content: "Dashibodi yako ya biashara. Tazama mauzo, kuunda viungo vya malipo na zaidi." },
   ] }),
   component: () => (<AuthGuard><Shell><Dashboard /></Shell></AuthGuard>),

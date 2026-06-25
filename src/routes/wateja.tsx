@@ -9,7 +9,7 @@ import { useProGate } from "@/lib/duka/useProGate";
 import { Search, Users } from "lucide-react";
 
 export const Route = createFileRoute("/wateja")({
-  head: () => ({ meta: [{ title: "Wateja — DUKA SMART" }, { name: "description", content: "Hifadhidata yako ya wateja." }] }),
+  head: () => ({ meta: [{ title: "Wateja — POKEA" }, { name: "description", content: "Hifadhidata yako ya wateja." }] }),
   component: () => (<AuthGuard><Shell><Wateja /></Shell></AuthGuard>),
 });
 

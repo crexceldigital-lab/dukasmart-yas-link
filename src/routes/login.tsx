@@ -6,7 +6,7 @@ import { YasLogo } from "@/components/duka/YasLogo";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Karibu — DUKA SMART" }] }),
+  head: () => ({ meta: [{ title: "Karibu — POKEA" }] }),
   component: LoginPage,
 });
 

@@ -1,5 +1,5 @@
 // ============================================================
-// DUKA SMART — Supabase Client
+// POKEA — Supabase Client
 // Replace: src/integrations/supabase/client.ts
 //
 // Set these in your Lovable project:

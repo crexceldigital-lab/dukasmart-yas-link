@@ -1,4 +1,4 @@
-// DUKA SMART — check-payment-status
+// POKEA — check-payment-status
 // Public endpoint used by the pay page to poll a transaction's status.
 // Returns ONLY the status field — never buyer phone, name, or provider IDs.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";

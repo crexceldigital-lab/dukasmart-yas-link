@@ -12,7 +12,7 @@ import { useProGate } from "@/lib/duka/useProGate";
 import { generateCatalogue } from "@/lib/duka/pdfCatalogue";
 
 export const Route = createFileRoute("/bidhaa")({
-  head: () => ({ meta: [{ title: "Bidhaa — DUKA SMART" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
+  head: () => ({ meta: [{ title: "Bidhaa — POKEA" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
   component: () => (<AuthGuard><Shell><Bidhaa /></Shell></AuthGuard>),
 });
 

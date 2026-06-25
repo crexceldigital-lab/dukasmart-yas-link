@@ -1,4 +1,4 @@
-// DUKA SMART — send-otp (Africa's Talking)
+// POKEA — send-otp (Africa's Talking)
 // Generates a 6-digit code, stores its HMAC hash in phone_otps, sends via AT SMS.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -38,7 +38,7 @@ async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; er
 
   if (!apiKeys.length) return { ok: false, error: "SMS gateway API key is not configured. Set AT_API_KEY to the API key from the same live Africa's Talking app as AT_USERNAME." };
 
-  const message = `Msimbo wako wa DUKA SMART ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
+  const message = `Msimbo wako wa POKEA ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
   // Live SMS must use the production API host. Do not change this to api.sandbox.africastalking.com.
   const liveHost = "https://api.africastalking.com";
 

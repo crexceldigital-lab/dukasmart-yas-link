@@ -1,4 +1,4 @@
-// DUKA SMART — verify-otp
+// POKEA — verify-otp
 // Validates the 6-digit code, finds/creates an auth user keyed by phone,
 // rotates a server-side password, returns it so the client can signInWithPassword.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";

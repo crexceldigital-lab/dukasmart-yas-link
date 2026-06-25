@@ -27,7 +27,7 @@ export function ProUpgradeModal({ open, onClose }: { open: boolean; onClose: () 
   useEffect(() => {
     if (stage !== "confirmed") return;
     upgradeToPro();
-    toast(t("Karibu kwenye Duka Smart Pro!", "Welcome to Duka Smart Pro!"));
+    toast(t("Karibu kwenye Pokea Pro!", "Welcome to Pokea Pro!"));
     const id = setTimeout(() => onClose(), 1800);
     return () => clearTimeout(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,7 +50,7 @@ export function ProUpgradeModal({ open, onClose }: { open: boolean; onClose: () 
       title={
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <Crown size={20} color="#F5A623" strokeWidth={2.5} />
-          {t("Pandisha hadi Duka Smart Pro", "Upgrade to Duka Smart Pro")}
+          {t("Pandisha hadi Pokea Pro", "Upgrade to Pokea Pro")}
         </span>
       }
       subtitle={stage === "intro" ? t("Fungua nguvu kamili ya duka lako", "Unlock the full power of your shop") : undefined}

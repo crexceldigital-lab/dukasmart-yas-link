@@ -18,7 +18,7 @@ export async function generateCatalogue(merchant: Merchant, products: Product[])
   doc.setFontSize(11);
   doc.text(`${merchant.dukaId}  •  ${merchant.city}`, margin, 62);
   doc.setFontSize(9);
-  doc.text("DUKA SMART — Katalogi ya Bidhaa", margin, 78);
+  doc.text("POKEA — Katalogi ya Bidhaa", margin, 78);
 
   let y = 120;
   const cardW = (pageW - margin * 2 - 16) / 2;
@@ -64,7 +64,7 @@ export async function generateCatalogue(merchant: Merchant, products: Product[])
     doc.setPage(i);
     doc.setFontSize(9);
     doc.setTextColor(107, 114, 128);
-    doc.text("Powered by DUKA SMART × Mixx by Yas", margin, pageH - 20);
+    doc.text("Powered by POKEA × Mixx by Yas", margin, pageH - 20);
     doc.text(`${i} / ${pages}`, pageW - margin, pageH - 20, { align: "right" });
   }
 

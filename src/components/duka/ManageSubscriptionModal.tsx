@@ -13,7 +13,7 @@ export function ManageSubscriptionModal({ open, onClose }: { open: boolean; onCl
       <div style={{ display: "grid", gap: 14 }}>
         <div className="dy-card" style={{ background: "#F0F4F8", border: "none" }}>
           <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>{t("Mpango", "Plan")}</div>
-          <div style={{ fontSize: 18, fontWeight: 800 }}>Duka Smart Pro</div>
+          <div style={{ fontSize: 18, fontWeight: 800 }}>Pokea Pro</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--dy-green)", marginTop: 4 }}>TZS 8,000 / {t("mwezi", "month")}</div>
         </div>
         {renewal && (

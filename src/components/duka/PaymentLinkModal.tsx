@@ -50,7 +50,7 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
   const whatsapp = () => {
     if (!url || !link) return;
     const lines = lang === "en" ? [
-      `*DUKA SMART* — Payment Request`,
+      `*POKEA* — Payment Request`,
       ``,
       `Hello! Please complete your payment:`,
       ``,
@@ -59,9 +59,9 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
       `Payment Link: ${url}`,
       ``,
       `Pay securely via *Mixx by Yas*.`,
-      `— ${merchant?.businessName ?? "DUKA SMART"}`,
+      `— ${merchant?.businessName ?? "POKEA"}`,
     ].join("\n") : [
-      `*DUKA SMART* — Ombi la Malipo`,
+      `*POKEA* — Ombi la Malipo`,
       ``,
       `Habari! Tafadhali kamilisha malipo yako:`,
       ``,
@@ -70,15 +70,15 @@ export function PaymentLinkModal({ open, onClose }: { open: boolean; onClose: ()
       `Kiungo cha Malipo: ${url}`,
       ``,
       `Lipa salama kupitia *Mixx by Yas*.`,
-      `— ${merchant?.businessName ?? "DUKA SMART"}`,
+      `— ${merchant?.businessName ?? "POKEA"}`,
     ].join("\n");
     window.open("https://wa.me/?text=" + encodeURIComponent(lines), "_blank");
   };
 
   const buildWaText = (linkRec: PaymentLink, url: string) => {
     return lang === "en"
-      ? `*DUKA SMART* — Payment Request\n\nItem: ${linkRec.label}\nAmount: ${formatTZS(linkRec.amount)}\nPayment Link: ${url}\n\nPay securely via *Mixx by Yas*.\n— ${merchant?.businessName ?? "DUKA SMART"}`
-      : `*DUKA SMART* — Ombi la Malipo\n\nBidhaa: ${linkRec.label}\nKiasi: ${formatTZS(linkRec.amount)}\nKiungo cha Malipo: ${url}\n\nLipa salama kupitia *Mixx by Yas*.\n— ${merchant?.businessName ?? "DUKA SMART"}`;
+      ? `*POKEA* — Payment Request\n\nItem: ${linkRec.label}\nAmount: ${formatTZS(linkRec.amount)}\nPayment Link: ${url}\n\nPay securely via *Mixx by Yas*.\n— ${merchant?.businessName ?? "POKEA"}`
+      : `*POKEA* — Ombi la Malipo\n\nBidhaa: ${linkRec.label}\nKiasi: ${formatTZS(linkRec.amount)}\nKiungo cha Malipo: ${url}\n\nLipa salama kupitia *Mixx by Yas*.\n— ${merchant?.businessName ?? "POKEA"}`;
   };
 
   const generateBulk = async () => {

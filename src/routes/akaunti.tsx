@@ -13,7 +13,7 @@ import { ManageSubscriptionModal } from "@/components/duka/ManageSubscriptionMod
 import { normalizePhone } from "@/lib/duka/utils";
 
 export const Route = createFileRoute("/akaunti")({
-  head: () => ({ meta: [{ title: "Akaunti — DUKA SMART" }, { name: "description", content: "Wasifu wako na mipangilio ya duka." }] }),
+  head: () => ({ meta: [{ title: "Akaunti — POKEA" }, { name: "description", content: "Wasifu wako na mipangilio ya duka." }] }),
   component: () => (<AuthGuard><Shell><Akaunti /></Shell></AuthGuard>),
 });
 
@@ -87,7 +87,7 @@ function Akaunti() {
             <div className="dy-card" style={{ background: "linear-gradient(135deg, #FFF4B8 0%, #FFE680 100%)", border: "1px solid #F5A623", display: "grid", gap: 10 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                 <Crown size={18} color="#F5A623" strokeWidth={2.5} />
-                <span style={{ fontSize: 15, fontWeight: 900, color: "var(--dy-navy)" }}>{t("Pandisha hadi Duka Smart Pro", "Upgrade to Duka Smart Pro")}</span>
+                <span style={{ fontSize: 15, fontWeight: 900, color: "var(--dy-navy)" }}>{t("Pandisha hadi Pokea Pro", "Upgrade to Pokea Pro")}</span>
               </div>
               <p style={{ fontSize: 13, color: "var(--dy-navy)", lineHeight: 1.5 }}>
                 {t("Bidhaa zisizo na kikomo, wateja wako wote, na zaidi — TZS 8,000/mwezi", "Unlimited products, all your customers, and more — TZS 8,000/month")}
@@ -137,10 +137,10 @@ function Akaunti() {
               {t("Kiungo Chako Maalum", "Your Custom Link")}
             </div>
             <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>
-              dukasmart.app/<b>{merchant.customSlug ?? merchant.dukaId}</b>
+              pokea.app/<b>{merchant.customSlug ?? merchant.dukaId}</b>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
-              <span className="dy-input" style={{ width: 130, display: "inline-flex", alignItems: "center", fontWeight: 700, color: "var(--dy-muted)" }}>dukasmart.app/</span>
+              <span className="dy-input" style={{ width: 130, display: "inline-flex", alignItems: "center", fontWeight: 700, color: "var(--dy-muted)" }}>pokea.app/</span>
               <input className="dy-input" value={slugInput} onChange={e => setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} placeholder="lizzlooks" />
             </div>
             <div style={{ fontSize: 12, color: slugInput ? (slugValid ? "var(--dy-green)" : "var(--dy-red)") : "var(--dy-muted)" }}>
@@ -211,7 +211,7 @@ function Akaunti() {
         </div>
 
         <div style={{ textAlign: "center", padding: "10px 0 20px", color: "var(--dy-muted)", fontSize: 11.5, lineHeight: 1.6 }}>
-          DUKA SMART v1.0 • Powered by YAS Business & Mixx by Yas<br/>
+          POKEA v1.0 • Powered by YAS Business & Mixx by Yas<br/>
           Built by Revoltek Limited • Dar es Salaam
         </div>
       </div>
