@@ -14,6 +14,7 @@ import { useRealtime } from "@/lib/duka/useRealtime";
 import { useCountUp } from "@/lib/duka/useCountUp";
 import { CreditRing } from "@/components/duka/CreditRing";
 import { PaymentToast } from "@/components/duka/PaymentToast";
+import { MsaidiziMarkFilled } from "@/components/duka/MsaidiziMark";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -251,23 +252,10 @@ function Dashboard() {
       <Link
         to="/msaidizi"
         aria-label={t("Msaidizi", "Assistant")}
-        style={{
-          position: "fixed",
-          right: 16,
-          bottom: 80,
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #123274, #00A86B)",
-          color: "#fff",
-          display: "grid",
-          placeItems: "center",
-          boxShadow: "0 8px 20px rgba(18,50,116,0.35)",
-          zIndex: 40,
-          textDecoration: "none",
-        }}
+        className="dy-fab-msaidizi"
       >
-        <Sparkles size={24} strokeWidth={2.5} />
+        <span className="dy-fab-msaidizi-ring" />
+        <MsaidiziMarkFilled size={26} />
       </Link>
     </>
   );

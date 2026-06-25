@@ -4,27 +4,7 @@ import { YasLogo } from "./YasLogo";
 import { LangToggle, useI18n } from "@/lib/duka/i18n";
 import { useDuka } from "@/lib/duka/store";
 import { ProBadge } from "./ProBadge";
-import { useTheme } from "@/lib/duka/useTheme";
-
-function ThemeToggle() {
-  const { theme, toggle } = useTheme();
-  const isDark = theme === "dark";
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      className="dy-theme-toggle"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDark ? "Light mode" : "Dark mode"}
-    >
-      {isDark ? (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-      ) : (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      )}
-    </button>
-  );
-}
+import { MsaidiziMark } from "./MsaidiziMark";
 
 export function Topbar({ title, subtitle, right }: { title: ReactNode; subtitle?: ReactNode; right?: ReactNode }) {
   const { merchant } = useDuka();
@@ -42,7 +22,6 @@ export function Topbar({ title, subtitle, right }: { title: ReactNode; subtitle?
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-        <ThemeToggle />
         <LangToggle />
         {right}
       </div>
@@ -58,7 +37,7 @@ export function BottomNav() {
     { to: "/bidhaa",  label: t("Bidhaa",   "Products"), icon: <BoxIcon /> },
     { to: "/mauzo",   label: t("Mauzo",    "Sales"),    icon: <TrendIcon /> },
     { to: "/afya",    label: t("Afya",     "Health"),   icon: <StarIcon /> },
-    { to: "/msaidizi",label: t("Msaidizi", "Assistant"),icon: <SparkleChatIcon /> },
+    { to: "/msaidizi",label: t("Msaidizi", "Assistant"),icon: <MsaidiziMark size={22} strokeWidth={2} /> },
     { to: "/akaunti", label: t("Akaunti",  "Account"),  icon: <UserIcon /> },
   ];
   return (
@@ -89,4 +68,3 @@ function BoxIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="curren
 function TrendIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>); }
 function StarIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg>); }
 function UserIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>); }
-function SparkleChatIcon() { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4l2 7 7 2-7 2-2 7-2-7-7-2 7-2z"/><path d="M20.5 3l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5z"/><path d="M4 18l.4 1.2 1.2.4-1.2.4-.4 1.2-.4-1.2-1.2-.4 1.2-.4z"/></svg>); }

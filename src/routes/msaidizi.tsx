@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Shell, Topbar } from "@/components/duka/Shell";
+import { Shell } from "@/components/duka/Shell";
 import { AuthGuard } from "@/components/duka/Guard";
 import { useDuka } from "@/lib/duka/store";
 import { useI18n } from "@/lib/duka/i18n";
 import { formatTZS, getTier } from "@/lib/duka/utils";
 import { msaidiziChat } from "@/lib/duka/msaidizi.functions";
-import { Sparkles, Send, Copy, Check, MessageCircle, RotateCcw, Link2 } from "lucide-react";
+import { Send, Copy, Check, MessageCircle, RotateCcw, Link2 } from "lucide-react";
 import { useToast } from "@/components/duka/Toast";
+import { MsaidiziMarkFilled } from "@/components/duka/MsaidiziMark";
 
 export const Route = createFileRoute("/msaidizi")({
   head: () => ({ meta: [
@@ -141,22 +142,30 @@ function MsaidiziPage() {
 
   return (
     <>
-      <Topbar title={t("Msaidizi", "Assistant")} subtitle={t("AI wako wa biashara", "Your business AI")} />
-      <div style={{ background: "#F0F4F8", minHeight: "calc(100vh - 64px)" }}>
-        <div ref={scrollerRef} style={{ padding: "14px 14px 90px" }}>
+      <div className="dy-msaidizi-header">
+        <div className="dy-msaidizi-header-row">
+          <div className="dy-msaidizi-avatar-lg">
+            <MsaidiziMarkFilled size={22} />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>{t("Msaidizi", "Assistant")}</div>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: 5 }}>
+              <span className="dy-live-dot" style={{ background: "#4ADE80" }} />
+              {t("AI wako wa biashara", "Your business AI")}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="dy-msaidizi-bg">
+        <div ref={scrollerRef} style={{ padding: "16px 14px 90px" }}>
           {/* Greeting */}
-          <AssistantBubble>{greeting}</AssistantBubble>
+          <AssistantBubble first>{greeting}</AssistantBubble>
 
           {messages.length === 0 && (
             <div style={{ marginTop: 14, marginBottom: 6, overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
               <div style={{ display: "inline-flex", gap: 8, paddingBottom: 4 }}>
                 {chips.map(c => (
-                  <button key={c} onClick={() => void send(c)} disabled={busy}
-                    style={{
-                      whiteSpace: "nowrap", padding: "8px 14px", borderRadius: 999,
-                      background: "#F0F4F8", color: "var(--dy-navy)",
-                      border: "1px solid #D6E0EC", fontSize: 13, fontWeight: 700, cursor: "pointer",
-                    }}>
+                  <button key={c} onClick={() => void send(c)} disabled={busy} className="dy-chip">
                     {c}
                   </button>
                 ))}
@@ -200,21 +209,16 @@ function MsaidiziPage() {
   );
 }
 
-function AssistantBubble({ children, error }: { children: React.ReactNode; error?: boolean }) {
+function AssistantBubble({ children, error, first }: { children: React.ReactNode; error?: boolean; first?: boolean }) {
   return (
-    <div style={{ display: "flex", gap: 8, alignItems: "flex-end", marginTop: 10 }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-        background: "linear-gradient(135deg, #123274, #00A86B)",
-        display: "grid", placeItems: "center", color: "#fff",
-      }}>
-        <Sparkles size={16} strokeWidth={2.5} />
+    <div className="dy-msg-row" style={{ display: "flex", gap: 8, alignItems: "flex-end", marginTop: 10 }}>
+      <div className="dy-msaidizi-avatar-sm">
+        <MsaidiziMarkFilled size={15} />
       </div>
-      <div style={{
-        background: "#fff", border: `1px solid ${error ? "#F5C2BD" : "#E2E8F0"}`,
-        color: "#1A202C", padding: "10px 12px", borderRadius: "14px 14px 14px 4px",
-        maxWidth: "78%", fontSize: 14, lineHeight: 1.45, whiteSpace: "pre-wrap", wordBreak: "break-word",
-      }}>
+      <div
+        className={"dy-bubble-assistant" + (error ? " dy-bubble-error" : "")}
+        style={first ? { background: "linear-gradient(135deg, rgba(18,50,116,0.06), rgba(0,168,107,0.06))" } : undefined}
+      >
         {children}
       </div>
     </div>
@@ -223,12 +227,8 @@ function AssistantBubble({ children, error }: { children: React.ReactNode; error
 
 function UserBubble({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
-      <div style={{
-        background: "#1A3E6F", color: "#fff", padding: "10px 12px",
-        borderRadius: "14px 14px 4px 14px", maxWidth: "78%",
-        fontSize: 14, lineHeight: 1.45, whiteSpace: "pre-wrap", wordBreak: "break-word",
-      }}>
+    <div className="dy-msg-row" style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+      <div className="dy-bubble-user">
         {children}
       </div>
     </div>
@@ -237,11 +237,11 @@ function UserBubble({ children }: { children: React.ReactNode }) {
 
 function TypingDots() {
   const dot: React.CSSProperties = {
-    width: 6, height: 6, borderRadius: "50%", background: "#94A3B8",
+    width: 7, height: 7, borderRadius: "50%", background: "#00A86B",
     display: "inline-block", animation: "dy-bounce 1.2s infinite ease-in-out",
   };
   return (
-    <span style={{ display: "inline-flex", gap: 4, alignItems: "center", padding: "2px 0" }}>
+    <span style={{ display: "inline-flex", gap: 5, alignItems: "center", padding: "4px 2px" }}>
       <span style={{ ...dot, animationDelay: "0s" }} />
       <span style={{ ...dot, animationDelay: "0.15s" }} />
       <span style={{ ...dot, animationDelay: "0.3s" }} />
@@ -310,12 +310,7 @@ function ComposerFixed({
   onSend: () => void; inputRef: React.RefObject<HTMLTextAreaElement | null>; placeholder: string;
 }) {
   return (
-    <div style={{
-      position: "fixed", left: "50%", transform: "translateX(-50%)",
-      bottom: 76, width: "100%", maxWidth: 430, zIndex: 35,
-      padding: "10px 12px", background: "#fff", borderTop: "1px solid var(--dy-border)",
-      display: "flex", alignItems: "flex-end", gap: 8,
-    }}>
+    <div className="dy-composer">
       <textarea
         ref={inputRef}
         value={input}
@@ -325,22 +320,16 @@ function ComposerFixed({
         }}
         rows={1}
         placeholder={placeholder}
-        style={{
-          flex: 1, resize: "none", maxHeight: 120, minHeight: 40,
-          padding: "10px 14px", borderRadius: 20, border: "1px solid var(--dy-border)",
-          background: "#F0F4F8", color: "var(--dy-text)", fontSize: 14, lineHeight: 1.4,
-          outline: "none", fontFamily: "inherit",
-        }}
+        className="dy-composer-input"
       />
       <button
         onClick={onSend}
         disabled={busy || !input.trim()}
         aria-label="Send"
+        className="dy-composer-send"
         style={{
-          width: 44, height: 44, borderRadius: "50%", border: "none",
-          background: busy || !input.trim() ? "#9AD9BD" : "#00A86B",
-          color: "#fff", display: "grid", placeItems: "center", cursor: busy ? "default" : "pointer",
-          flexShrink: 0, transition: "background 150ms ease",
+          background: busy || !input.trim() ? "#B7C6E0" : "linear-gradient(135deg, #123274, #00A86B)",
+          cursor: busy ? "default" : "pointer",
         }}
       >
         <Send size={18} strokeWidth={2.5} />
