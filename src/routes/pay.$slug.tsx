@@ -291,9 +291,13 @@ function PayPage() {
                   flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13, fontWeight: 700,
                   border: "2px solid var(--dy-navy)", background: "var(--dy-navy)",
                   color: "#fff", textAlign: "center",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 }}
               >
-                💳 Mixx by YAS
+                <span style={{ background: "#fff", borderRadius: 6, padding: "2px 4px", display: "inline-flex" }}>
+                  <YasLogo size={20} />
+                </span>
+                Mixx by YAS
               </div>
             </div>
           </div>
