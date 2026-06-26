@@ -1,6 +1,7 @@
 // POKEA — send-otp
-// Generates 6-digit OTP, stores HMAC hash, sends via Africa's Talking.
-// Demo fallback: when DEMO_OTP_MODE=true OR no AT credentials configured,
+// Generates 6-digit OTP, stores HMAC hash, sends via Beem Africa (primary)
+// with Africa's Talking as fallback.
+// Demo fallback: when DEMO_OTP_MODE=true OR no SMS credentials configured,
 // returns the code in the response so login works end-to-end in sandbox.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -30,6 +31,50 @@ function genOtp(): string {
 }
 
 type SendResult = { ok: boolean; channel: "sms" | "demo"; error?: string; demoCode?: string };
+
+async function sendBeem(phoneE164: string, otp: string): Promise<{ ok: boolean; error?: string }> {
+  const apiKey = Deno.env.get("BEEM_API_KEY")?.trim();
+  const secretKey = Deno.env.get("BEEM_SECRET_KEY")?.trim();
+  const senderId = Deno.env.get("BEEM_SENDER_ID")?.trim() || "INFO";
+  if (!apiKey || !secretKey) return { ok: false, error: "Beem credentials missing" };
+
+  const message = `Msimbo wako wa POKEA ni: ${otp}. Usimwambie mtu yeyote. Muda: dakika 5.`;
+  const recipient = phoneE164.replace(/^\+/, "");
+  const auth = btoa(`${apiKey}:${secretKey}`);
+
+  const res = await fetch("https://apisms.beem.africa/v1/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      source_addr: senderId,
+      schedule_time: "",
+      encoding: 0,
+      message,
+      recipients: [{ recipient_id: 1, dest_addr: recipient }],
+    }),
+  });
+  const text = await res.text();
+  console.log("[send-otp] Beem status=", res.status, "body=", text.slice(0, 300));
+  if (!res.ok) {
+    try {
+      const j = JSON.parse(text);
+      return { ok: false, error: j?.message || j?.error || `Beem HTTP ${res.status}` };
+    } catch {
+      return { ok: false, error: `Beem HTTP ${res.status}` };
+    }
+  }
+  try {
+    const json = JSON.parse(text) as { successful?: boolean; code?: number; message?: string };
+    if (json?.successful === true || json?.code === 100) return { ok: true };
+    return { ok: false, error: json?.message || "Beem send failed" };
+  } catch {
+    return { ok: true };
+  }
+}
 
 async function sendAT(phoneE164: string, otp: string): Promise<{ ok: boolean; error?: string }> {
   const username = (Deno.env.get("AT_USERNAME")?.trim() || Deno.env.get("AFRICASTALKING_USERNAME")?.trim() || "").replace(/^sandbox$/i, "");
@@ -81,21 +126,27 @@ Deno.serve(async (req) => {
   }
 
   const demoMode = (Deno.env.get("DEMO_OTP_MODE") ?? "").toLowerCase() === "true";
+  const hasBeem = Boolean(Deno.env.get("BEEM_API_KEY")?.trim() && Deno.env.get("BEEM_SECRET_KEY")?.trim());
   const hasAT = Boolean(
     (Deno.env.get("AT_USERNAME")?.trim() || Deno.env.get("AFRICASTALKING_USERNAME")?.trim()) &&
     (Deno.env.get("AT_API_KEY")?.trim() || Deno.env.get("AFRICASTALKING_API_KEY")?.trim())
   );
 
   // Demo fallback path: skip SMS, return code so user can complete login.
-  if (demoMode || !hasAT) {
+  if (demoMode || (!hasBeem && !hasAT)) {
     const result: SendResult = { ok: true, channel: "demo", demoCode: otp };
     console.log("[send-otp] demo mode active, returning code in response");
     return new Response(JSON.stringify(result), { headers: CORS });
   }
 
-  const sent = await sendAT(phoneE164, otp);
+  // Try Beem first, then Africa's Talking as fallback.
+  let sent = hasBeem ? await sendBeem(phoneE164, otp) : { ok: false, error: "Beem not configured" };
+  if (!sent.ok && hasAT) {
+    console.warn("[send-otp] Beem failed, falling back to AT:", sent.error);
+    sent = await sendAT(phoneE164, otp);
+  }
   if (!sent.ok) {
-    console.error("[send-otp] AT failed:", sent.error);
+    console.error("[send-otp] SMS send failed:", sent.error);
     // Keep OTP valid; surface failure so UI can show banner.
     const result: SendResult = { ok: false, channel: "sms", error: sent.error ?? "SMS delivery failed" };
     return new Response(JSON.stringify(result), { status: 200, headers: CORS });
