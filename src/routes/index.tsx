@@ -7,7 +7,7 @@ import { formatTZS, formatDate, getGreeting, getTier } from "@/lib/duka/utils";
 import { StatusPill } from "@/components/duka/StatusPill";
 import { PaymentLinkModal } from "@/components/duka/PaymentLinkModal";
 import { useI18n } from "@/lib/duka/i18n";
-import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Sparkles, Users, TrendingUp, Wallet } from "lucide-react";
+import { Zap, Star, Gift, ReceiptText, CheckCircle2, Clock, XCircle, ArrowRight, Sparkles, Users, TrendingUp, Wallet, MessageSquare } from "lucide-react";
 import { useProGate } from "@/lib/duka/useProGate";
 import { ProLockOverlay } from "@/components/duka/ProLockOverlay";
 import { useRealtime } from "@/lib/duka/useRealtime";
@@ -18,7 +18,7 @@ import { MsaidiziMarkFilled } from "@/components/duka/MsaidiziMark";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Nyumbani — POKEA" },
+    { title: "Nyumbani — DUKA SMART" },
     { name: "description", content: "Dashibodi yako ya biashara. Tazama mauzo, kuunda viungo vya malipo na zaidi." },
   ] }),
   component: () => (<AuthGuard><Shell><Dashboard /></Shell></AuthGuard>),
@@ -182,6 +182,32 @@ function Dashboard() {
             </div>
             <div style={{ fontSize: 12, color: "var(--dy-muted)", marginTop: 2 }}>
               {t("Fuatilia gharama za biashara yako", "Track your business expenses")}
+            </div>
+          </div>
+          <ArrowRight size={18} strokeWidth={2.5} color="var(--dy-muted)" />
+        </Link>
+
+        <Link
+          to="/ujumbe"
+          className="dy-card"
+          style={{ "--dy-i": 6, textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 12 } as React.CSSProperties}
+        >
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(18,50,116,0.1)", color: "var(--dy-navy)", display: "grid", placeItems: "center", flexShrink: 0, position: "relative" }}>
+            <MessageSquare size={20} strokeWidth={2.5} />
+            {(merchant?.smsCredits ?? 0) > 0 && (
+              <span style={{ position: "absolute", top: -4, right: -4, background: "var(--dy-green)", color: "#fff", fontSize: 9, fontWeight: 800, padding: "2px 5px", borderRadius: 999, minWidth: 18, textAlign: "center" }}>
+                {merchant?.smsCredits}
+              </span>
+            )}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: 6 }}>
+              {t("Ujumbe wa Wingi", "Bulk SMS")}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--dy-muted)", marginTop: 2 }}>
+              {(merchant?.smsCredits ?? 0) > 0
+                ? t(`SMS ${merchant?.smsCredits} zilizobaki · TZS 18/SMS`, `${merchant?.smsCredits} credits remaining · TZS 18/SMS`)
+                : t("Wasiliana na wateja wako wote · TZS 18/SMS", "Reach all your customers · TZS 18/SMS")}
             </div>
           </div>
           <ArrowRight size={18} strokeWidth={2.5} color="var(--dy-muted)" />

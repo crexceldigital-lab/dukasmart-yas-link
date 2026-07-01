@@ -1,5 +1,5 @@
 // ============================================================
-// POKEA — Payment Webhook Edge Function
+// DUKA SMART — Payment Webhook Edge Function
 // Deploy: supabase functions deploy payment-webhook
 //
 // This single handler supports multiple payment providers.
@@ -174,6 +174,77 @@ Deno.serve(async (req: Request) => {
       console.error("[webhook] confirm_transaction failed:", error);
       return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 200 });
     }
+
+    // ── Voice Bonus: award to the first YAS buyer ──────────────────
+    // After a confirmed payment, check if the transaction's product has
+    // an unawarded voice bonus. If so, mark it as awarded and provision
+    // the voice minutes via the YAS Business API.
+    try {
+      const { data: txFull } = await supabase
+        .from("transactions")
+        .select("product_id, buyer_phone, merchant_id")
+        .eq("id", result.internalTxId)
+        .single();
+
+      if (txFull?.product_id) {
+        const { data: product } = await supabase
+          .from("products")
+          .select("id, bonus_voice_mins, bonus_awarded")
+          .eq("id", txFull.product_id)
+          .single();
+
+        if (product?.bonus_voice_mins && !product.bonus_awarded && txFull.buyer_phone) {
+          // Mark as awarded immediately (idempotent — webhook may retry)
+          const { error: awardErr } = await supabase
+            .from("products")
+            .update({ bonus_awarded: true })
+            .eq("id", product.id)
+            .eq("bonus_awarded", false); // only update if not already awarded (race condition guard)
+
+          if (!awardErr) {
+            console.log(`[webhook] Voice bonus: ${product.bonus_voice_mins}min → ${txFull.buyer_phone}`);
+
+            // ── YAS Business API call to provision voice minutes ────
+            // TODO: Replace with real YAS Business API endpoint when available.
+            // The payload below is a placeholder based on the expected shape.
+            // Contact YAS Business integration team for the actual endpoint and auth.
+            const yasApiKey = Deno.env.get("YAS_BUSINESS_API_KEY");
+            const yasApiUrl = Deno.env.get("YAS_BUSINESS_API_URL");
+            if (yasApiKey && yasApiUrl) {
+              try {
+                const apiRes = await fetch(`${yasApiUrl}/v1/rewards/voice`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${yasApiKey}`,
+                  },
+                  body: JSON.stringify({
+                    phone: txFull.buyer_phone,      // buyer's phone number
+                    minutes: product.bonus_voice_mins,
+                    merchant_id: txFull.merchant_id,
+                    transaction_id: result.internalTxId,
+                    note: `POKEA Bonus — Product purchase voice reward`,
+                  }),
+                });
+                if (!apiRes.ok) {
+                  console.warn("[webhook] YAS voice API returned non-200:", await apiRes.text());
+                }
+              } catch (apiErr) {
+                console.error("[webhook] YAS voice API call failed:", apiErr);
+                // Don't fail the webhook — the bonus_awarded flag is already set.
+                // YAS support can re-provision manually using the transaction_id.
+              }
+            } else {
+              console.warn("[webhook] YAS_BUSINESS_API_KEY or YAS_BUSINESS_API_URL not set — voice bonus logged but not provisioned.");
+            }
+          }
+        }
+      }
+    } catch (bonusErr) {
+      // Never let bonus logic block the main webhook response
+      console.error("[webhook] Voice bonus award error (non-fatal):", bonusErr);
+    }
+    // ── End Voice Bonus ───────────────────────────────────────────
   } else {
     await supabase.rpc("fail_transaction", {
       p_tx_id: result.internalTxId,

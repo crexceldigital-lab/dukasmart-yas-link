@@ -1,5 +1,5 @@
 // ============================================================
-// POKEA — Public Pay Page
+// DUKA SMART — Public Pay Page
 // Replace: src/routes/pay.$slug.tsx  (or pay.tsx with slug param)
 //
 // This is what buyers see when they tap a payment link.
@@ -27,6 +27,8 @@ type LinkInfo = {
   productDescription?: string | null;
   merchantName: string;
   merchantCity: string;
+  bonusVoiceMins?: number | null;
+  bonusAwarded?: boolean;
 };
 
 function PayPage() {
@@ -35,7 +37,7 @@ function PayPage() {
   const [link, setLink] = useState<LinkInfo | null>(null);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [provider] = useState<"mixx">("mixx");
+  const [provider, setProvider] = useState<"mixx" | "mpesa">("mixx");
   const [txId, setTxId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -55,6 +57,8 @@ function PayPage() {
         productDescription: row.product_description,
         merchantName: row.merchant_name,
         merchantCity: row.merchant_city,
+        bonusVoiceMins: row.bonus_voice_mins ?? null,
+        bonusAwarded: row.bonus_awarded ?? false,
       });
       setStep("form");
     }
@@ -148,7 +152,7 @@ function PayPage() {
         </p>
         <p style={{ color: "var(--dy-muted)", fontSize: 13 }}>Utapokea risiti kwenye simu yako hivi karibuni.</p>
         <div style={{ marginTop: 8, padding: "12px 20px", background: "#f0fdf4", borderRadius: 14, border: "1.5px solid #bbf7d0" }}>
-          <p style={{ fontSize: 12, color: "#166534", fontWeight: 700 }}>Powered by Mixx by YAS × POKEA</p>
+          <p style={{ fontSize: 12, color: "#166534", fontWeight: 700 }}>Powered by Mixx by YAS × DUKA SMART</p>
         </div>
       </div>
     </Screen>
@@ -188,7 +192,7 @@ function PayPage() {
         <h2 style={{ fontWeight: 900, color: "var(--dy-navy)", fontSize: 20 }}>Angalia Simu Yako</h2>
         <p style={{ color: "var(--dy-text)", fontSize: 14, lineHeight: 1.6 }}>
           Ombi la malipo la <b>{formatTZS(link?.amount ?? 0)}</b> limetumwa kwa <b>+255 {phone}</b>.
-          <br />Ingiza PIN yako ya Mixx kuthibitisha.
+          <br />Ingiza PIN yako ya {provider === "mixx" ? "Mixx" : "M-Pesa"} kuthibitisha.
         </p>
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
           {[0, 1, 2].map(i => (
@@ -236,6 +240,27 @@ function PayPage() {
               <p style={{ fontSize: 13, color: "var(--dy-muted)", marginTop: 4 }}>{link.productDescription}</p>
             )}
           </div>
+
+          {/* Voice bonus badge — shown to buyers before they pay */}
+          {link?.bonusVoiceMins && !link?.bonusAwarded && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 12,
+              padding: "12px 14px", borderRadius: 12,
+              background: "linear-gradient(135deg, rgba(0,168,107,0.08), rgba(0,168,107,0.03))",
+              border: "1.5px solid rgba(0,168,107,0.35)",
+            }}>
+              <span style={{ fontSize: 26 }}>📞</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--dy-green)" }}>
+                  Pata Dakika {link.bonusVoiceMins} za Simu Bure!
+                </div>
+                <div style={{ fontSize: 12, color: "var(--dy-muted)", marginTop: 2, lineHeight: 1.4 }}>
+                  Mnunuzi wa kwanza wa YAS kupitia kiungo hiki anapata dakika {link.bonusVoiceMins} za simu (mtandao wowote) bila malipo.
+                </div>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{ fontSize: 13, color: "var(--dy-muted)" }}>Kiasi cha kulipa</span>
             <span style={{ fontWeight: 900, fontSize: 22, color: "var(--dy-navy)" }}>
@@ -286,19 +311,21 @@ function PayPage() {
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--dy-muted)" }}>Lipa kwa</label>
             <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-              <div
-                style={{
-                  flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13, fontWeight: 700,
-                  border: "2px solid var(--dy-navy)", background: "var(--dy-navy)",
-                  color: "#fff", textAlign: "center",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                }}
-              >
-                <span style={{ background: "#fff", borderRadius: 6, padding: "2px 4px", display: "inline-flex" }}>
-                  <YasLogo size={20} />
-                </span>
-                Mixx by YAS
-              </div>
+              {(["mixx", "mpesa"] as const).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setProvider(p)}
+                  style={{
+                    flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13, fontWeight: 700,
+                    border: "2px solid " + (provider === p ? "var(--dy-navy)" : "var(--dy-border)"),
+                    background: provider === p ? "var(--dy-navy)" : "var(--dy-surface)",
+                    color: provider === p ? "#fff" : "var(--dy-text)",
+                    cursor: "pointer", transition: "all 150ms ease",
+                  }}
+                >
+                  {p === "mixx" ? "💳 Mixx by YAS" : "📱 M-Pesa"}
+                </button>
+              ))}
             </div>
           </div>
 

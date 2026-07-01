@@ -12,7 +12,7 @@ import { useProGate } from "@/lib/duka/useProGate";
 import { generateCatalogue } from "@/lib/duka/pdfCatalogue";
 
 export const Route = createFileRoute("/bidhaa")({
-  head: () => ({ meta: [{ title: "Bidhaa — POKEA" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
+  head: () => ({ meta: [{ title: "Bidhaa — DUKA SMART" }, { name: "description", content: "Simamia bidhaa zako: ongeza, hariri na ondoa." }] }),
   component: () => (<AuthGuard><Shell><Bidhaa /></Shell></AuthGuard>),
 });
 
@@ -51,6 +51,49 @@ function Bidhaa() {
         }
       />
       <div style={{ padding: 16 }}>
+        {/* Stock Value Summary Card */}
+        {products.length > 0 && (() => {
+          const productsWithStock = products.filter(p => p.stockCount != null && p.stockCount > 0);
+          const stockValueSelling = productsWithStock.reduce((sum, p) => sum + p.priceTzs * (p.stockCount ?? 0), 0);
+          const stockValueCost = productsWithStock.filter(p => p.buyingPriceTzs != null).reduce((sum, p) => sum + (p.buyingPriceTzs ?? 0) * (p.stockCount ?? 0), 0);
+          const totalUnits = productsWithStock.reduce((sum, p) => sum + (p.stockCount ?? 0), 0);
+          const grossMargin = stockValueCost > 0 ? ((stockValueSelling - stockValueCost) / stockValueSelling * 100).toFixed(0) : null;
+          return (
+            <div className="dy-card" style={{ marginBottom: 12, background: "linear-gradient(135deg, rgba(18,50,116,0.04), rgba(0,168,107,0.04))", border: "1px solid rgba(0,168,107,0.2)" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, fontWeight:700, color:"var(--dy-navy)", marginBottom:10, textTransform:"uppercase", letterSpacing:".04em" }}>
+                <Package size={13} strokeWidth={2.5} /> {t("Thamani ya Stoki", "Stock Value")}
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
+                <div>
+                  <div style={{ fontSize:10, color:"var(--dy-muted)", fontWeight:600, textTransform:"uppercase" }}>{t("Bei ya Mauzo","Selling Value")}</div>
+                  <div style={{ fontSize:15, fontWeight:900, color:"var(--dy-green)", marginTop:2 }}>{formatTZS(stockValueSelling)}</div>
+                </div>
+                {stockValueCost > 0 && (
+                  <div>
+                    <div style={{ fontSize:10, color:"var(--dy-muted)", fontWeight:600, textTransform:"uppercase" }}>{t("Bei ya Ununuzi","Cost Value")}</div>
+                    <div style={{ fontSize:15, fontWeight:900, color:"var(--dy-navy)", marginTop:2 }}>{formatTZS(stockValueCost)}</div>
+                  </div>
+                )}
+                {grossMargin && (
+                  <div>
+                    <div style={{ fontSize:10, color:"var(--dy-muted)", fontWeight:600, textTransform:"uppercase" }}>{t("Faida ya Jumla","Gross Margin")}</div>
+                    <div style={{ fontSize:15, fontWeight:900, color:"#00A86B", marginTop:2 }}>{grossMargin}%</div>
+                  </div>
+                )}
+                {!stockValueCost && (
+                  <div>
+                    <div style={{ fontSize:10, color:"var(--dy-muted)", fontWeight:600, textTransform:"uppercase" }}>{t("Bidhaa","SKUs")}</div>
+                    <div style={{ fontSize:15, fontWeight:900, color:"var(--dy-navy)", marginTop:2 }}>{productsWithStock.length}</div>
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize:10, color:"var(--dy-muted)", fontWeight:600, textTransform:"uppercase" }}>{t("Vipande","Total Units")}</div>
+                  <div style={{ fontSize:15, fontWeight:900, color:"var(--dy-navy)", marginTop:2 }}>{totalUnits.toLocaleString()}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
         {isPro && lowStock.length > 0 && !dismissLow && (
           <div style={{ background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.45)", color: "var(--dy-navy)", padding: 12, borderRadius: 12, fontSize: 13, display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <AlertTriangle size={18} color="#F5A623" strokeWidth={2.5} />
@@ -105,6 +148,16 @@ function Bidhaa() {
                   <div style={{ fontSize: 11, fontWeight: 700, color: "var(--dy-green)", display: "inline-flex", alignItems: "center", gap: 4 }}>
                     <TrendingUp size={11} strokeWidth={2.5} />
                     {t("Faida:", "Profit:")} {formatTZS(p.priceTzs - p.buyingPriceTzs)} {t("/ moja", "/ each")}
+                  </div>
+                )}
+                {p.bonusVoiceMins && (
+                  <div style={{ fontSize: 11, fontWeight: 700, display:"inline-flex", alignItems:"center", gap:4,
+                    color: p.bonusAwarded ? "var(--dy-muted)" : "var(--dy-green)",
+                    textDecoration: p.bonusAwarded ? "line-through" : "none" }}>
+                    📞 {p.bonusAwarded
+                      ? t("Bonus imetumika", "Bonus awarded")
+                      : t(`Dakika ${p.bonusVoiceMins} bure kwa mnunuzi wa 1 wa YAS`, `${p.bonusVoiceMins}min free for 1st YAS buyer`)
+                    }
                   </div>
                 )}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
@@ -162,7 +215,7 @@ function IconBtn({ children, onClick, title, color }: { children: React.ReactNod
   return <button onClick={onClick} title={title} style={{ background: "#F0F4F8", border: "none", borderRadius: 8, padding: "8px 0", fontSize: 14, color: color ?? "var(--dy-text)", cursor: "pointer", minHeight: 36, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{children}</button>;
 }
 
-function ProductSheet({ open, onClose, editing, isPro, onSave }: { open: boolean; onClose: () => void; editing: Product | null; isPro: boolean; onSave: (data: { name: string; priceTzs: number; buyingPriceTzs?: number; description?: string; photoUrl?: string; stockCount?: number }) => void }) {
+function ProductSheet({ open, onClose, editing, isPro, onSave }: { open: boolean; onClose: () => void; editing: Product | null; isPro: boolean; onSave: (data: { name: string; priceTzs: number; buyingPriceTzs?: number; description?: string; photoUrl?: string; stockCount?: number; bonusVoiceMins?: number }) => void }) {
   const { t } = useI18n();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -171,12 +224,14 @@ function ProductSheet({ open, onClose, editing, isPro, onSave }: { open: boolean
   const [photo, setPhoto] = useState("");
   const [stock, setStock] = useState("");
   const [uploadErr, setUploadErr] = useState("");
+  const [bonusEnabled, setBonusEnabled] = useState(false);
 
   // Reset fields when opening
   useResetOnOpen(open, () => {
     setName(editing?.name ?? ""); setPrice(editing ? String(editing.priceTzs) : ""); setDesc(editing?.description ?? "");
     setBuyPrice(editing?.buyingPriceTzs != null ? String(editing.buyingPriceTzs) : "");
     setPhoto(editing?.photoUrl ?? ""); setStock(editing?.stockCount != null ? String(editing.stockCount) : ""); setUploadErr("");
+    setBonusEnabled(!!(editing?.bonusVoiceMins));
   });
 
   const handleFile = async (file: File) => {
@@ -227,9 +282,54 @@ function ProductSheet({ open, onClose, editing, isPro, onSave }: { open: boolean
           </div>
         </div>
         <div><label className="dy-label">{t("Idadi Iliyopo", "Stock Count")}</label><input className="dy-input" inputMode="numeric" value={stock} onChange={e => setStock(e.target.value.replace(/\D/g, ""))} placeholder="10" /></div>
+
+        {/* Feature 4: Voice Bonus — Pro only */}
+        {isPro && (
+          <div style={{ padding:"12px 14px", borderRadius:12, border:`1.5px solid ${bonusEnabled ? "rgba(0,168,107,0.4)" : "#E2E8F0"}`,
+            background: bonusEnabled ? "rgba(0,168,107,0.05)" : "#FAFAFA" }}>
+            <div style={{ display:"flex", alignItems:"flex-start", gap:12 }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:13, fontWeight:700, color:"var(--dy-navy)", display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
+                  <span style={{ fontSize:16 }}>📞</span>
+                  {t("Bonus Malipo — Dakika 3 za Bure", "Payment Bonus — 3 Free Voice Minutes")}
+                </div>
+                <div style={{ fontSize:11.5, color:"var(--dy-muted)", lineHeight:1.5 }}>
+                  {t("Mnunuzi wa kwanza wa YAS anayenunua bidhaa hii anapata dakika 3 za simu (mtandao wowote) bure.", "The first YAS customer who buys this product gets 3 free voice minutes on any network.")}
+                </div>
+                {bonusEnabled && editing?.bonusAwarded && (
+                  <div style={{ marginTop:6, fontSize:11.5, color:"var(--dy-green)", fontWeight:700, display:"flex", alignItems:"center", gap:4 }}>
+                    <CheckCircle2 size={12} strokeWidth={2.5} />
+                    {t("Bonus imeshatumika kwa mnunuzi wa kwanza.", "Bonus already awarded to the first buyer.")}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setBonusEnabled(v => !v)}
+                disabled={!!(editing?.bonusAwarded)}
+                style={{
+                  width:44, height:26, borderRadius:999, border:"none", cursor: editing?.bonusAwarded ? "default" : "pointer",
+                  background: bonusEnabled ? "var(--dy-green)" : "#CBD5E0",
+                  position:"relative", flexShrink:0, transition:"background 200ms ease", marginTop:2,
+                }}>
+                <span style={{
+                  position:"absolute", top:3, left: bonusEnabled ? 22 : 3, width:20, height:20,
+                  borderRadius:"50%", background:"#fff", transition:"left 200ms ease",
+                  boxShadow:"0 1px 3px rgba(0,0,0,0.2)",
+                }} />
+              </button>
+            </div>
+          </div>
+        )}
+
         <button className="dy-btn dy-btn-primary" onClick={() => {
           if (!name.trim() || !price) return;
-          onSave({ name: name.trim(), priceTzs: Number(price), buyingPriceTzs: isPro && buyPrice ? Number(buyPrice) : undefined, description: desc || undefined, photoUrl: photo || undefined, stockCount: stock ? Number(stock) : undefined });
+          onSave({
+            name: name.trim(), priceTzs: Number(price),
+            buyingPriceTzs: isPro && buyPrice ? Number(buyPrice) : undefined,
+            description: desc || undefined, photoUrl: photo || undefined,
+            stockCount: stock ? Number(stock) : undefined,
+            bonusVoiceMins: isPro && bonusEnabled && !(editing?.bonusAwarded) ? 3 : undefined,
+          });
         }} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           {editing ? <><Save size={16} strokeWidth={2.5} /> {t("Hifadhi Mabadiliko", "Save Changes")}</> : <><CheckCircle2 size={16} strokeWidth={2.5} /> {t("Ongeza Bidhaa", "Add Product")}</>}
         </button>

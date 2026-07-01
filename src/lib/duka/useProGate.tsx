@@ -4,6 +4,7 @@ import { ProUpgradeModal } from "@/components/duka/ProUpgradeModal";
 
 type Ctx = {
   isPro: boolean;
+  isMjasiriamali: boolean;
   openUpgrade: () => void;
   requirePro: (action: () => void) => void;
 };
@@ -12,7 +13,9 @@ const ProGateCtx = createContext<Ctx | null>(null);
 
 export function ProGateProvider({ children }: { children: ReactNode }) {
   const { merchant } = useDuka();
-  const isPro = merchant?.plan === "pro";
+  // Mjasiriamali Box is a superset of Pro — all Pro features are available
+  const isMjasiriamali = merchant?.plan === "mjasiriamali";
+  const isPro = merchant?.plan === "pro" || isMjasiriamali;
   const [open, setOpen] = useState(false);
 
   const openUpgrade = useCallback(() => setOpen(true), []);
@@ -21,7 +24,7 @@ export function ProGateProvider({ children }: { children: ReactNode }) {
     else setOpen(true);
   }, [isPro]);
 
-  const value = useMemo(() => ({ isPro, openUpgrade, requirePro }), [isPro, openUpgrade, requirePro]);
+  const value = useMemo(() => ({ isPro, isMjasiriamali, openUpgrade, requirePro }), [isPro, isMjasiriamali, openUpgrade, requirePro]);
 
   return (
     <ProGateCtx.Provider value={value}>
@@ -34,6 +37,5 @@ export function ProGateProvider({ children }: { children: ReactNode }) {
 export function useProGate(): Ctx {
   const v = useContext(ProGateCtx);
   if (v) return v;
-  // Safe fallback (no provider) — treat as free, no-op upgrade.
-  return { isPro: false, openUpgrade: () => {}, requirePro: () => {} };
+  return { isPro: false, isMjasiriamali: false, openUpgrade: () => {}, requirePro: () => {} };
 }

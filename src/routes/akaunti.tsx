@@ -13,7 +13,7 @@ import { ManageSubscriptionModal } from "@/components/duka/ManageSubscriptionMod
 import { normalizePhone } from "@/lib/duka/utils";
 
 export const Route = createFileRoute("/akaunti")({
-  head: () => ({ meta: [{ title: "Akaunti — POKEA" }, { name: "description", content: "Wasifu wako na mipangilio ya duka." }] }),
+  head: () => ({ meta: [{ title: "Akaunti — DUKA SMART" }, { name: "description", content: "Wasifu wako na mipangilio ya duka." }] }),
   component: () => (<AuthGuard><Shell><Akaunti /></Shell></AuthGuard>),
 });
 
@@ -25,7 +25,7 @@ function Akaunti() {
   const navigate = useNavigate();
   const toast = useToast();
   const { t } = useI18n();
-  const { isPro, openUpgrade } = useProGate();
+  const { isPro, isMjasiriamali, openUpgrade } = useProGate();
   const [manageOpen, setManageOpen] = useState(false);
   const [slugInput, setSlugInput] = useState(merchant?.customSlug ?? "");
   const [staffInput, setStaffInput] = useState("");
@@ -65,36 +65,97 @@ function Akaunti() {
     <>
       <Topbar title={t("Wasifu Wangu", "My Profile")} subtitle={merchant.dukaId} />
       <div style={{ padding: 16, display: "grid", gap: 16 }}>
-        {/* Pro upgrade / member card */}
+        {/* Plan cards — Free / Pro / Mjasiriamali Box */}
         {isOwner && (
-          isPro ? (
-            <div className="dy-card" style={{ background: "linear-gradient(135deg, var(--dy-navy) 0%, var(--dy-navy-2) 100%)", color: "#fff", border: "none", display: "grid", gap: 8 }}>
+          isMjasiriamali ? (
+            // Mjasiriamali Box member card
+            <div className="dy-card" style={{ background: "linear-gradient(135deg, #0F2A5C 0%, #0E7C53 130%)", color: "#fff", border: "none", display: "grid", gap: 10 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                 <Crown size={18} color="#FFD100" strokeWidth={2.5} />
-                <span style={{ fontSize: 15, fontWeight: 800 }}>{t("Mwanachama wa Pro", "Pro Member")}</span>
-                <ProBadge />
+                <span style={{ fontSize: 15, fontWeight: 800 }}>Mjasiriamali Box</span>
+                <span style={{ fontSize: 10, fontWeight: 900, background: "#FFD100", color: "#0F2A5C", padding: "2px 8px", borderRadius: 999 }}>GOLD</span>
               </div>
-              {merchant.proRenewalDate && (
-                <div style={{ fontSize: 12.5, opacity: 0.85 }}>
-                  {t("Inajiongeza tena: ", "Renews on: ")}{new Date(merchant.proRenewalDate).toLocaleDateString()}
+              <div style={{ fontSize: 12.5, opacity: 0.85 }}>
+                {t("Bidhaa zisizo na kikomo · Ujumbe wa Wingi · Mkopo wa Biashara · Saraka ya YAS Business", "Unlimited products · Bulk SMS · SME Loans · YAS Business Directory")}
+              </div>
+              <div style={{ display: "flex", gap: 10, flexWrap:"wrap", marginTop: 4 }}>
+                <a href="http://mjasiriamali.yas.co.tz" target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 12, fontWeight: 700, color: "#FFD100", textDecoration: "none" }}>
+                  {t("Saraka ya Mjasiriamali →", "Selfcare Portal →")}
+                </a>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>101 {t("kwa usaidizi", "for support")}</span>
+              </div>
+            </div>
+          ) : isPro ? (
+            // Pro member card + Mjasiriamali upgrade nudge
+            <div style={{ display:"grid", gap:10 }}>
+              <div className="dy-card" style={{ background: "linear-gradient(135deg, var(--dy-navy) 0%, var(--dy-navy-2) 100%)", color: "#fff", border: "none", display: "grid", gap: 8 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Crown size={18} color="#FFD100" strokeWidth={2.5} />
+                  <span style={{ fontSize: 15, fontWeight: 800 }}>{t("Mwanachama wa Pro", "Pro Member")}</span>
+                  <ProBadge />
                 </div>
-              )}
-              <button onClick={() => setManageOpen(true)} style={{ alignSelf: "flex-start", background: "transparent", border: "none", color: "#FFD100", fontWeight: 700, fontSize: 13, padding: 0, marginTop: 4, cursor: "pointer" }}>
-                {t("Simamia Usajili →", "Manage Subscription →")}
-              </button>
+                {merchant.proRenewalDate && (
+                  <div style={{ fontSize: 12.5, opacity: 0.85 }}>
+                    {t("Inajiongeza tena: ", "Renews on: ")}{new Date(merchant.proRenewalDate).toLocaleDateString()}
+                  </div>
+                )}
+                <button onClick={() => setManageOpen(true)} style={{ alignSelf: "flex-start", background: "transparent", border: "none", color: "#FFD100", fontWeight: 700, fontSize: 13, padding: 0, marginTop: 4, cursor: "pointer" }}>
+                  {t("Simamia Usajili →", "Manage Subscription →")}
+                </button>
+              </div>
+              {/* Mjasiriamali upgrade nudge for Pro members */}
+              <div className="dy-card" style={{ display:"flex", alignItems:"center", gap:12, background:"#F0FDF9", border:"1px solid rgba(0,168,107,0.25)" }}>
+                <div style={{ width:38, height:38, borderRadius:10, background:"linear-gradient(135deg,#0F2A5C,#0E7C53)", display:"grid", placeItems:"center", flexShrink:0 }}>
+                  <Crown size={18} color="#FFD100" strokeWidth={2.5} />
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13, fontWeight:800, color:"var(--dy-navy)" }}>Mjasiriamali Box</div>
+                  <div style={{ fontSize:11.5, color:"var(--dy-muted)", marginTop:2 }}>
+                    {t("Ongeza Ujumbe wa Wingi, Mkopo, na Saraka ya YAS", "Add Bulk SMS, SME Loans & YAS Directory")}
+                  </div>
+                </div>
+                <a href="https://www.yas.co.tz/business/pro-sme/mjasiriamali-box/" target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize:12, fontWeight:700, color:"var(--dy-navy)", textDecoration:"none", flexShrink:0 }}>
+                  {t("Jifunze →", "Learn →")}
+                </a>
+              </div>
             </div>
           ) : (
-            <div className="dy-card" style={{ background: "linear-gradient(135deg, #FFF4B8 0%, #FFE680 100%)", border: "1px solid #F5A623", display: "grid", gap: 10 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                <Crown size={18} color="#F5A623" strokeWidth={2.5} />
-                <span style={{ fontSize: 15, fontWeight: 900, color: "var(--dy-navy)" }}>{t("Pandisha hadi Pokea Pro", "Upgrade to Pokea Pro")}</span>
+            // Free — show both Pro and Mjasiriamali options
+            <div style={{ display:"grid", gap:10 }}>
+              <div className="dy-card" style={{ background: "linear-gradient(135deg, #FFF4B8 0%, #FFE680 100%)", border: "1px solid #F5A623", display: "grid", gap: 10 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Crown size={18} color="#F5A623" strokeWidth={2.5} />
+                  <span style={{ fontSize: 15, fontWeight: 900, color: "var(--dy-navy)" }}>{t("Pandisha hadi Pokea Pro", "Upgrade to Pokea Pro")}</span>
+                </div>
+                <p style={{ fontSize: 13, color: "var(--dy-navy)", lineHeight: 1.5 }}>
+                  {t("Bidhaa zisizo na kikomo, wateja wako wote, na zaidi — TZS 8,000/mwezi", "Unlimited products, all your customers, and more — TZS 8,000/month")}
+                </p>
+                <button className="dy-btn" onClick={openUpgrade} style={{ background: "var(--dy-navy)", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <Sparkles size={16} strokeWidth={2.5} /> {t("Pandisha Sasa", "Upgrade Now")}
+                </button>
               </div>
-              <p style={{ fontSize: 13, color: "var(--dy-navy)", lineHeight: 1.5 }}>
-                {t("Bidhaa zisizo na kikomo, wateja wako wote, na zaidi — TZS 8,000/mwezi", "Unlimited products, all your customers, and more — TZS 8,000/month")}
-              </p>
-              <button className="dy-btn" onClick={openUpgrade} style={{ background: "var(--dy-navy)", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <Sparkles size={16} strokeWidth={2.5} /> {t("Pandisha Sasa", "Upgrade Now")}
-              </button>
+              <div className="dy-card" style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #E0F2FE 100%)", border: "1px solid #93C5FD", display: "grid", gap: 10 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Crown size={18} color="#1D4ED8" strokeWidth={2.5} />
+                  <span style={{ fontSize: 13, fontWeight: 800, color: "#1D4ED8" }}>Mjasiriamali Box</span>
+                  <span style={{ fontSize: 10, fontWeight: 900, background: "linear-gradient(135deg,#0F2A5C,#0E7C53)", color: "#fff", padding: "2px 8px", borderRadius: 999 }}>YAS BUSINESS</span>
+                </div>
+                <p style={{ fontSize: 12.5, color: "#1E3A5F", lineHeight: 1.6 }}>
+                  {t("Suluhisho kamili kwa SME — 5 SIM, 4G/5G Router, Ujumbe wa Wingi, Mkopo wa Biashara, na Saraka ya Biashara.", "Complete SME solution — 5 SIMs, 4G/5G Router, Bulk SMS, SME Loans & Business Directory.")}
+                </p>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  {[t("BRONZE","BRONZE"), t("SILVER","SILVER"), t("GOLD","GOLD"), t("DIAMOND","DIAMOND")].map(tier => (
+                    <span key={tier} style={{ fontSize:11, fontWeight:700, padding:"3px 10px", borderRadius:999, background:"#fff", color:"#1D4ED8", border:"1px solid #93C5FD" }}>{tier}</span>
+                  ))}
+                </div>
+                <a href="https://www.yas.co.tz/business/pro-sme/mjasiriamali-box/" target="_blank" rel="noopener noreferrer">
+                  <button className="dy-btn" style={{ width:"100%", background: "linear-gradient(135deg, #0F2A5C, #0E7C53)", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                    <Crown size={15} strokeWidth={2.5} /> {t("Jifunze zaidi — YAS Business", "Learn More — YAS Business")}
+                  </button>
+                </a>
+              </div>
             </div>
           )
         )}
@@ -137,10 +198,10 @@ function Akaunti() {
               {t("Kiungo Chako Maalum", "Your Custom Link")}
             </div>
             <div style={{ fontSize: 12, color: "var(--dy-muted)" }}>
-              pokea.app/<b>{merchant.customSlug ?? merchant.dukaId}</b>
+              dukasmart.app/<b>{merchant.customSlug ?? merchant.dukaId}</b>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
-              <span className="dy-input" style={{ width: 130, display: "inline-flex", alignItems: "center", fontWeight: 700, color: "var(--dy-muted)" }}>pokea.app/</span>
+              <span className="dy-input" style={{ width: 130, display: "inline-flex", alignItems: "center", fontWeight: 700, color: "var(--dy-muted)" }}>dukasmart.app/</span>
               <input className="dy-input" value={slugInput} onChange={e => setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} placeholder="lizzlooks" />
             </div>
             <div style={{ fontSize: 12, color: slugInput ? (slugValid ? "var(--dy-green)" : "var(--dy-red)") : "var(--dy-muted)" }}>
@@ -211,7 +272,7 @@ function Akaunti() {
         </div>
 
         <div style={{ textAlign: "center", padding: "10px 0 20px", color: "var(--dy-muted)", fontSize: 11.5, lineHeight: 1.6 }}>
-          POKEA v1.0 • Powered by YAS Business & Mixx by Yas<br/>
+          DUKA SMART v1.0 • Powered by YAS Business & Mixx by Yas<br/>
           Built by Revoltek Limited • Dar es Salaam
         </div>
       </div>

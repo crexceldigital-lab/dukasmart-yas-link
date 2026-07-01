@@ -9,13 +9,15 @@ export type Merchant = {
   merchantId: string; dukaId: string; phone: string;
   businessName: string; category: string; city: string; bio: string;
   profilePhoto?: string; creditScore: number; createdAt: string;
-  plan?: "free" | "pro"; proRenewalDate?: string | null;
+  plan?: "free" | "pro" | "mjasiriamali"; proRenewalDate?: string | null;
   customSlug?: string | null; staffPhones?: string[];
+  smsCredits?: number;
 };
 export type Product = {
   id: string; name: string; priceTzs: number; buyingPriceTzs?: number;
   description?: string; photoUrl?: string; stockCount?: number;
   isAvailable: boolean; unitsSold?: number;
+  bonusVoiceMins?: number; bonusAwarded?: boolean;
 };
 export type TxStatus = "confirmed" | "pending" | "failed";
 export type Transaction = {
@@ -48,10 +50,11 @@ function toMerchant(r: Record<string,unknown>): Merchant {
     profilePhoto: r.profile_photo as string|undefined,
     creditScore: (r.credit_score as number) ?? 20,
     createdAt: r.created_at as string,
-    plan: (r.plan as "free"|"pro") ?? "free",
+    plan: (r.plan as "free"|"pro"|"mjasiriamali") ?? "free",
     proRenewalDate: r.pro_renewal_date as string|null,
     customSlug: r.custom_slug as string|null,
     staffPhones: (r.staff_phones as string[]) ?? [],
+    smsCredits: (r.sms_credits as number) ?? 0,
   };
 }
 function toProd(r: Record<string,unknown>): Product {
@@ -61,6 +64,8 @@ function toProd(r: Record<string,unknown>): Product {
     description: r.description as string|undefined, photoUrl: r.photo_url as string|undefined,
     stockCount: r.stock_count as number|undefined, isAvailable: r.is_available as boolean,
     unitsSold: (r.units_sold as number) ?? 0,
+    bonusVoiceMins: r.bonus_voice_mins as number|undefined,
+    bonusAwarded: (r.bonus_awarded as boolean) ?? false,
   };
 }
 function toTx(r: Record<string,unknown>): Transaction {
@@ -106,6 +111,9 @@ type Ctx = {
   updateProfile: (patch:Partial<Merchant>) => Promise<void>;
   upgradeToPro: () => Promise<void>;
   cancelPro: () => Promise<void>;
+  upgradeToMjasiriamali: () => Promise<void>;
+  purchaseSmsCredits: (pack: 50 | 100 | 200 | 500) => Promise<void>;
+  deductSmsCredits: (count: number) => Promise<void>;
   setCustomSlug: (slug:string|null) => Promise<void>;
   addStaffPhone: (phone:string) => Promise<boolean>;
   removeStaffPhone: (phone:string) => Promise<void>;
@@ -306,6 +314,7 @@ export function DukaProvider({ children }: { children: ReactNode }) {
       merchant_id:merchant.merchantId,name:p.name,price_tzs:p.priceTzs,
       buying_price_tzs:p.buyingPriceTzs,description:p.description,photo_url:p.photoUrl,
       stock_count:p.stockCount??0,is_available:p.isAvailable??true,units_sold:p.unitsSold??0,
+      bonus_voice_mins: p.bonusVoiceMins ?? null,
     }).select().single();
     if(error)throw error;
     const prod=toProd(data as Record<string,unknown>);
@@ -322,9 +331,35 @@ export function DukaProvider({ children }: { children: ReactNode }) {
     if(patch.photoUrl!==undefined)db.photo_url=patch.photoUrl;
     if(patch.stockCount!==undefined)db.stock_count=patch.stockCount;
     if(patch.isAvailable!==undefined)db.is_available=patch.isAvailable;
+    if("bonusVoiceMins" in patch)db.bonus_voice_mins=patch.bonusVoiceMins??null;
     const { data } = await supabase.from("products").update(db).eq("id",id).select().single();
     if(data)setProducts(l=>l.map(x=>x.id===id?toProd(data as Record<string,unknown>):x));
   },[]);
+
+  const upgradeToMjasiriamali = useCallback(async () => {
+    if(!merchant)return;
+    // Mjasiriamali Box is purchased via YAS store — this sets the plan flag after
+    // YAS confirms the subscription externally. In production this would be triggered
+    // by a webhook from YAS Business after selfcare activation.
+    const { data } = await supabase.from("merchants").update({plan:"mjasiriamali"}).eq("id",merchant.merchantId).select().single();
+    if(data)setMerchant(toMerchant(data as Record<string,unknown>));
+  },[merchant]);
+
+  const purchaseSmsCredits = useCallback(async (pack: 50|100|200|500) => {
+    if(!merchant)return;
+    // Payment is handled separately via the Mixx flow (same as Pro upgrade).
+    // This function is called after payment confirmation to credit the merchant.
+    const newCredits = (merchant.smsCredits ?? 0) + pack;
+    const { data } = await supabase.from("merchants").update({sms_credits:newCredits}).eq("id",merchant.merchantId).select().single();
+    if(data)setMerchant(toMerchant(data as Record<string,unknown>));
+  },[merchant]);
+
+  const deductSmsCredits = useCallback(async (count:number) => {
+    if(!merchant)return;
+    const newCredits = Math.max(0, (merchant.smsCredits ?? 0) - count);
+    const { data } = await supabase.from("merchants").update({sms_credits:newCredits}).eq("id",merchant.merchantId).select().single();
+    if(data)setMerchant(toMerchant(data as Record<string,unknown>));
+  },[merchant]);
 
   const toggleProduct = useCallback(async (id:string) => {
     const p=products.find(x=>x.id===id);if(!p)return;
@@ -425,7 +460,8 @@ export function DukaProvider({ children }: { children: ReactNode }) {
 
   const value:Ctx = {
     merchant,loading,sessionRole,products,transactions,rewards,links,customers,restocks,expenses,stats,finance,
-    login,logout,updateProfile,upgradeToPro,cancelPro,setCustomSlug,
+    login,logout,updateProfile,upgradeToPro,cancelPro,upgradeToMjasiriamali,
+    purchaseSmsCredits,deductSmsCredits,setCustomSlug,
     addStaffPhone,removeStaffPhone,addProduct,updateProduct,toggleProduct,deleteProduct,
     restockProduct,addExpense,deleteExpense,createLink,getLink,
     startTransaction,confirmTransaction,failTransaction,getTransaction,refreshAll,

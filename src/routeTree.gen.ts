@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatejaRouteImport } from './routes/wateja'
+import { Route as UjumbeRouteImport } from './routes/ujumbe'
 import { Route as MsaidiziRouteImport } from './routes/msaidizi'
 import { Route as MauzoRouteImport } from './routes/mauzo'
 import { Route as MatumiziRouteImport } from './routes/matumizi'
@@ -23,6 +24,11 @@ import { Route as PaySlugRouteImport } from './routes/pay.$slug'
 const WatejaRoute = WatejaRouteImport.update({
   id: '/wateja',
   path: '/wateja',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UjumbeRoute = UjumbeRouteImport.update({
+  id: '/ujumbe',
+  path: '/ujumbe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MsaidiziRoute = MsaidiziRouteImport.update({
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/matumizi': typeof MatumiziRoute
   '/mauzo': typeof MauzoRoute
   '/msaidizi': typeof MsaidiziRoute
+  '/ujumbe': typeof UjumbeRoute
   '/wateja': typeof WatejaRoute
   '/pay/$slug': typeof PaySlugRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/matumizi': typeof MatumiziRoute
   '/mauzo': typeof MauzoRoute
   '/msaidizi': typeof MsaidiziRoute
+  '/ujumbe': typeof UjumbeRoute
   '/wateja': typeof WatejaRoute
   '/pay/$slug': typeof PaySlugRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/matumizi': typeof MatumiziRoute
   '/mauzo': typeof MauzoRoute
   '/msaidizi': typeof MsaidiziRoute
+  '/ujumbe': typeof UjumbeRoute
   '/wateja': typeof WatejaRoute
   '/pay/$slug': typeof PaySlugRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/matumizi'
     | '/mauzo'
     | '/msaidizi'
+    | '/ujumbe'
     | '/wateja'
     | '/pay/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/matumizi'
     | '/mauzo'
     | '/msaidizi'
+    | '/ujumbe'
     | '/wateja'
     | '/pay/$slug'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/matumizi'
     | '/mauzo'
     | '/msaidizi'
+    | '/ujumbe'
     | '/wateja'
     | '/pay/$slug'
   fileRoutesById: FileRoutesById
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   MatumiziRoute: typeof MatumiziRoute
   MauzoRoute: typeof MauzoRoute
   MsaidiziRoute: typeof MsaidiziRoute
+  UjumbeRoute: typeof UjumbeRoute
   WatejaRoute: typeof WatejaRoute
   PaySlugRoute: typeof PaySlugRoute
 }
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/wateja'
       fullPath: '/wateja'
       preLoaderRoute: typeof WatejaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ujumbe': {
+      id: '/ujumbe'
+      path: '/ujumbe'
+      fullPath: '/ujumbe'
+      preLoaderRoute: typeof UjumbeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/msaidizi': {
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatumiziRoute: MatumiziRoute,
   MauzoRoute: MauzoRoute,
   MsaidiziRoute: MsaidiziRoute,
+  UjumbeRoute: UjumbeRoute,
   WatejaRoute: WatejaRoute,
   PaySlugRoute: PaySlugRoute,
 }
