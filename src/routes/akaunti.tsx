@@ -13,7 +13,7 @@ import { ManageSubscriptionModal } from "@/components/duka/ManageSubscriptionMod
 import { normalizePhone } from "@/lib/duka/utils";
 
 export const Route = createFileRoute("/akaunti")({
-  head: () => ({ meta: [{ title: "Akaunti — DUKA SMART" }, { name: "description", content: "Wasifu wako na mipangilio ya duka." }] }),
+  head: () => ({ meta: [{ title: "Akaunti — POKEA" }, { name: "description", content: "Wasifu wako na mipangilio ya duka." }] }),
   component: () => (<AuthGuard><Shell><Akaunti /></Shell></AuthGuard>),
 });
 
@@ -272,7 +272,7 @@ function Akaunti() {
         </div>
 
         <div style={{ textAlign: "center", padding: "10px 0 20px", color: "var(--dy-muted)", fontSize: 11.5, lineHeight: 1.6 }}>
-          DUKA SMART v1.0 • Powered by YAS Business & Mixx by Yas<br/>
+          POKEA v1.0 • Powered by YAS Business & Mixx by Yas<br/>
           Built by Revoltek Limited • Dar es Salaam
         </div>
       </div>

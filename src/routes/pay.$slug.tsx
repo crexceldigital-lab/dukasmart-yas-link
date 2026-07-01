@@ -1,5 +1,5 @@
 // ============================================================
-// DUKA SMART — Public Pay Page
+// POKEA — Public Pay Page
 // Replace: src/routes/pay.$slug.tsx  (or pay.tsx with slug param)
 //
 // This is what buyers see when they tap a payment link.
@@ -152,7 +152,7 @@ function PayPage() {
         </p>
         <p style={{ color: "var(--dy-muted)", fontSize: 13 }}>Utapokea risiti kwenye simu yako hivi karibuni.</p>
         <div style={{ marginTop: 8, padding: "12px 20px", background: "#f0fdf4", borderRadius: 14, border: "1.5px solid #bbf7d0" }}>
-          <p style={{ fontSize: 12, color: "#166534", fontWeight: 700 }}>Powered by Mixx by YAS × DUKA SMART</p>
+          <p style={{ fontSize: 12, color: "#166534", fontWeight: 700 }}>Powered by Mixx by YAS × POKEA</p>
         </div>
       </div>
     </Screen>
