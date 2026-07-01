@@ -80,15 +80,12 @@ small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
 }
 .dy-hero {
   position: relative; overflow: hidden;
-  background: linear-gradient(135deg, #123274 0%, #1B49A6 100%);
+  background: #123274;
   color: #fff; border-radius: 18px; padding: 20px;
   box-shadow: 0 8px 24px rgba(18,50,116,0.28);
 }
 .dy-hero::after {
-  content: ""; position: absolute; right: -40px; bottom: -60px;
-  width: 180px; height: 180px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,209,0,0.35) 0%, rgba(255,209,0,0) 70%);
-  pointer-events: none;
+  display: none;
 }
 
 .dy-btn {
@@ -174,7 +171,7 @@ small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
    reserved specifically for confirmed-payment realtime events. */
 .dy-toast-payment {
   position: fixed; top: 14px; left: 50%; transform: translateX(-50%) scale(0.92);
-  background: linear-gradient(135deg, #123274, #0E7C53);
+  background: #123274;
   color: #fff; padding: 12px 20px; border-radius: 16px;
   font-size: 13.5px; font-weight: 700; z-index: 90;
   display: flex; align-items: center; gap: 8px;
@@ -214,7 +211,7 @@ small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
 .dy-fab-msaidizi {
   position: fixed; right: 16px; bottom: 80px;
   width: 56px; height: 56px; border-radius: 50%;
-  background: linear-gradient(135deg, #123274, #00A86B);
+  background: #123274;
   color: #fff; display: grid; place-items: center;
   box-shadow: 0 8px 20px rgba(18,50,116,0.4);
   z-index: 40; text-decoration: none;
@@ -236,7 +233,7 @@ small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
 /* ───────────────── Msaidizi chat room ───────────────── */
 
 .dy-msaidizi-header {
-  background: linear-gradient(135deg, #0F2A5C 0%, #123274 55%, #0E7C53 130%);
+  background: #123274;
   padding: 14px 16px 18px;
   position: sticky; top: 0; z-index: 30;
 }
@@ -249,17 +246,14 @@ small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
 }
 .dy-msaidizi-avatar-sm {
   width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, #123274, #00A86B);
+  background: #123274;
   display: grid; place-items: center; color: #fff;
   box-shadow: 0 2px 6px rgba(18,50,116,0.3);
 }
 
 .dy-msaidizi-bg {
   min-height: calc(100vh - 64px);
-  background:
-    radial-gradient(circle at 15% 0%, rgba(0,168,107,0.07), transparent 45%),
-    radial-gradient(circle at 90% 25%, rgba(18,50,116,0.06), transparent 40%),
-    #F4F7FB;
+  background: #F4F7FB;
 }
 
 .dy-msg-row {
@@ -285,7 +279,7 @@ small, .dy-small { font-size: 12px; line-height: 1.45; color: var(--dy-muted); }
   background: #FFF8F7;
 }
 .dy-bubble-user {
-  background: linear-gradient(135deg, #123274, #1B49A6);
+  background: #123274;
   color: #fff;
   padding: 11px 14px;
   border-radius: 16px 4px 16px 16px;

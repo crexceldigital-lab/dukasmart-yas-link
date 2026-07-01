@@ -114,7 +114,7 @@ function Dashboard() {
           <StatCard label={t("Wiki Hii", "This Week")} value={formatTZS(animatedWeek)} sub={`${stats.week.count} ${t("miamala", "txns")}`} accent="var(--dy-green)" />
           <StatCard label={t("Mwezi Huu", "This Month")} value={formatTZS(stats.month.total)} sub={`${stats.month.count} ${t("miamala", "txns")}`} />
           <StatCard label={t("Jumla Yote", "All Time")} value={formatTZS(stats.allTime.total)} sub={`${stats.allTime.count} ${t("miamala", "txns")}`} />
-          <div className="dy-card" style={{ background: "linear-gradient(135deg, #123274, #1B49A6)", color: "#fff", border: "none", display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="dy-card" style={{ background: "#123274", color: "#fff", border: "none", display: "flex", alignItems: "center", gap: 10 }}>
             <CreditRing score={merchant.creditScore} size={52} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 10.5, fontWeight: 600, opacity: 0.8, textTransform: "uppercase", letterSpacing: ".05em" }}>{t("Afya ya Biashara", "Business Health")}</div>

@@ -267,7 +267,7 @@ function UjumbeWingi() {
           </>
         ) : (
           <>
-            <div className="dy-card" style={{ background:"linear-gradient(135deg,#0F2A5C,#1B49A6)", border:"none", color:"#fff" }}>
+            <div className="dy-card" style={{ background:"#123274", border:"none", color:"#fff" }}>
               <div style={{ fontSize:13, opacity:0.8, marginBottom:6 }}>{t("SMS zilizobaki", "Credits remaining")}</div>
               <div style={{ fontSize:36, fontWeight:900, color:"#FFD100" }}>{credits}</div>
               <div style={{ fontSize:12, opacity:0.7, marginTop:4 }}>{t("1 SMS = TZS 18 — Yas YAS Business", "1 SMS = TZS 18 via YAS Business")}</div>

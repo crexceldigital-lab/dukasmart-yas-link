@@ -67,7 +67,7 @@ export function ProUpgradeModal({ open, onClose }: { open: boolean; onClose: () 
               </div>
             ))}
           </div>
-          <div style={{ background: "linear-gradient(135deg, var(--dy-navy), var(--dy-navy-2))", color: "#fff", borderRadius: 14, padding: 18, textAlign: "center" }}>
+          <div style={{ background: "var(--dy-navy)", color: "#fff", borderRadius: 14, padding: 18, textAlign: "center" }}>
             <div style={{ fontSize: 38, fontWeight: 900, letterSpacing: "-0.02em" }}>TZS 8,000</div>
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{t("/mwezi", "/month")}</div>
           </div>

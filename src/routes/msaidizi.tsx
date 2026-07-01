@@ -217,7 +217,7 @@ function AssistantBubble({ children, error, first }: { children: React.ReactNode
       </div>
       <div
         className={"dy-bubble-assistant" + (error ? " dy-bubble-error" : "")}
-        style={first ? { background: "linear-gradient(135deg, rgba(18,50,116,0.06), rgba(0,168,107,0.06))" } : undefined}
+        style={first ? { background: "#F0F4FA" } : undefined}
       >
         {children}
       </div>
@@ -328,7 +328,7 @@ function ComposerFixed({
         aria-label="Send"
         className="dy-composer-send"
         style={{
-          background: busy || !input.trim() ? "#B7C6E0" : "linear-gradient(135deg, #123274, #00A86B)",
+          background: busy || !input.trim() ? "#B7C6E0" : "#123274",
           cursor: busy ? "default" : "pointer",
         }}
       >

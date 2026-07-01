@@ -133,7 +133,7 @@ function LoginPage() {
       minHeight: "100vh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       maxWidth: 430, margin: "0 auto",
-      background: "linear-gradient(180deg,#123274 0%,#0B1F4D 100%)",
+      background: "#123274",
       color: "#fff", padding: 24, gap: 18,
     }}>
       <YasLogo size={64} />
